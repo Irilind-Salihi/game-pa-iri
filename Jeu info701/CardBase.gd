@@ -1,6 +1,6 @@
 extends MarginContainer
 
-
+##ceci est un push bidon
 onready var CardsData = preload("res://Assets/Card/CardsData.gd")
 var CardName = 'Morbier'
 onready	var CardInfo = CardsData.DATA2[CardsData.get("Fourme")]
