@@ -6,7 +6,7 @@ extends Node2D
 # var b = "text"
 
 const CardSize = Vector2(125,175)
-const CardBase = preload("res://Assets/Card/CardBase.tscn")
+const CardBase = preload("res://CardBase.tscn")
 const PlayerHand = preload("res://Assets/Player_Hand/Player_Hand.gd")
 var CardSelected = []
 onready var DeckSize = PlayerHand.CardList.size()
