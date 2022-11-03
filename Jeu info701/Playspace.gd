@@ -34,7 +34,7 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
-
+onready var DeckPosition = $Deck.position
 func drawcard():
 	angle = PI/2 + CardSpread*(float(NumberCardsHand)/2 - NumberCardsHand)
 	var new_card = CardBase.instance()
@@ -42,7 +42,7 @@ func drawcard():
 	new_card.Cardname = PlayerHand.CardList[CardSelected]
 #	new_card.rect_position = get_global_mouse_position() 
 	OvalAngleVector = Vector2(Hor_rad * cos(angle), - Ver_rad * sin(angle))
-	new_card.startpos = $Deck.position - CardSize/2
+	new_card.rect_position = DeckPosition - CardSize/2
 	new_card.targetpos = CentreCardOval + OvalAngleVector - CardSize
 	new_card.Cardpos = new_card.targetpos
 	new_card.startrot = 0
@@ -62,8 +62,8 @@ func drawcard():
 		Card.Card_Numb = Card_Numb
 		Card_Numb += 1
 		if Card.state == InHand:
+			Card.setup = true
 			Card.state = ReOrganiseHand
-			Card.startpos = Card.rect_position
 		elif Card.state == MoveDrawnCardToHand:
 			Card.startpos = Card.targetpos - ((Card.targetpos - Card.rect_position)/(1-Card.t))
 	$Cards.add_child(new_card)

@@ -88,6 +88,8 @@ func _physics_process(delta):
 				rect_rotation = 0
 				rect_scale = Orig_scale*ZoomInSize
 		MoveDrawnCardToHand: # animate from the deck to my hand
+			if setup:
+				Setup()
 			if t <= 1: # Always be a 1
 				rect_position = startpos.linear_interpolate(targetpos, t)
 				rect_rotation = startrot * (1-t) + targetrot*t
@@ -138,6 +140,7 @@ func Move_Neighbour_Card(Card_Numb,Left,Spreadfactor):
 	NeighbourCard.Move_Neightbour_Card_Check = true
 	
 func Reset_Card(Card_Numb):
+	NeighbourCard = $'../'.get_child(Card_Numb)
 #	if NeighbourCard.Move_Neightbour_Card_Check:
 #		NeighbourCard.Move_Neightbour_Card_Check = false
 	if NeighbourCard.Move_Neightbour_Card_Check == false:
