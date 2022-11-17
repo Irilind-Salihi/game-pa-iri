@@ -1,6 +1,5 @@
 extends MarginContainer
 
-
 # Declare member variables here. Examples:
 onready var CardDatabase = preload("res://Assets/Cards/CardsDatabase.gd")
 var Cardname = 'Bois'
@@ -14,6 +13,7 @@ var t = 0
 var DRAWTIME = 1
 var ORGANISETIME = 0.5
 onready var Orig_scale = rect_scale
+
 enum{
 	InHand
 	InPlay
@@ -62,6 +62,7 @@ var oldstate = INF
 var CARD_SELECT = true
 var INMOUSETIME = 0.1
 var MovingtoInPlay = false
+var MovingtoHand = false
 var targetscale = Vector2()
 var DiscardPile = Vector2()
 var MovingtoDiscard = false
@@ -69,17 +70,30 @@ var MovingtoDiscard = false
 func _input(event):
 	match state:
 		FocusInHand, InMouse, InPlay:
+			var CardSlots = $'../../CardSlots'
+			var CardSlotEmpty = $'../..'.CardSlotEmpty
 			if event.is_action_pressed("leftclick"):
-				if CARD_SELECT:
+				if CARD_SELECT && state != InPlay:
 					oldstate = state 
 					state = InMouse
 					setup = true
 					CARD_SELECT = false
+				for i in range(CardSlots.get_child_count()):
+					var CardSlotPos = CardSlots.get_child(i).rect_position
+					var CardSlotSize = CardSlots.get_child(i).rect_size
+					var mousepos = get_global_mouse_position()
+					if CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
+						var CardInPlay = $'../../CardInPlay'
+						if CardInPlay.get_child_count() > 0 :
+							var LastCard = CardInPlay.get_child(CardInPlay.get_child_count()-1)
+							LastCard.oldstate = state 
+							LastCard.state = InMouse
+							LastCard.setup = true
+							LastCard.CARD_SELECT = false
+							break
 			if event.is_action_released("leftclick"):
 				if CARD_SELECT == false:
 					if oldstate == FocusInHand:
-						var CardSlots = $'../../CardSlots'
-						var CardSlotEmpty = $'../..'.CardSlotEmpty
 						for i in range(CardSlots.get_child_count()):
 							if CardSlotEmpty[i]:
 								var CardSlotPos = CardSlots.get_child(i).rect_position
@@ -98,14 +112,26 @@ func _input(event):
 							targetpos = Cardpos
 							state = ReOrganiseHand
 							CARD_SELECT = true
-					else: 
+					else:
 						setup = true
-						MovingtoDiscard = true
 						targetpos = Cardpos
 						state = ReOrganiseHand
-						$'../../'.ReParentCardInHand(0)
-#						state = MoveDrawnCardToDiscard
+						$'../../'.ReParentCardInHand()
 						CARD_SELECT = true
+						
+#						setup = true
+#						MovingtoInPlay = true
+#						targetpos = Cardpos
+#						targetscale = CardSlotSize/rect_size
+#						state = InPlay
+#						CARD_SELECT = true
+						
+#						setup = true
+#						MovingtoDiscard = true
+#						targetpos = Cardpos
+#						state = ReOrganiseHand
+#						state = MoveDrawnCardToDiscard
+#						CARD_SELECT = true
 
 
 func _physics_process(delta):
@@ -113,6 +139,22 @@ func _physics_process(delta):
 		InHand:
 			pass
 		InPlay:
+			if MovingtoHand:
+				if setup:
+					Setup()
+				if t <= 1: # Always be a 1
+					rect_position = startpos.linear_interpolate(targetpos, t)
+					rect_rotation = startrot * (1-t) + 0*t
+					rect_scale = startscale * (1-t) + targetscale*t
+					t += delta/float(INMOUSETIME)
+				else:
+					rect_position = targetpos
+					rect_rotation = 0
+					rect_scale = targetscale
+					MovingtoHand = false
+					state = InHand
+					
+					
 			if MovingtoInPlay:
 				if setup:
 					Setup()
@@ -215,7 +257,7 @@ func _physics_process(delta):
 					rect_scale = Orig_scale
 					MovingtoDiscard = false
 
-func Move_Neighbour_Card(Card_Numb,Left,Spreadfactor):
+func Move_Neighbour_Card(Card_Numb,Left,Spreadfactor):	
 	NeighbourCard = $'../'.get_child(Card_Numb)
 	if Left:
 		NeighbourCard.targetpos = NeighbourCard.Cardpos - Spreadfactor*Vector2(65,0)
@@ -255,8 +297,8 @@ func _on_Focus_mouse_exited():
 		FocusInHand:
 			setup = true
 			targetpos = Cardpos
-			state = ReOrganiseHand
+			state = ReOrganiseHand	
 			
 # To do : 
 #	- Focus compatible sur téléphone 
-#	- _on_Focus_mouse_exited() pas trigger
+#	- Fin de tour, tout défausse (et occasionnelement event pour garder)

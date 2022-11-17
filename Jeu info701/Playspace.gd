@@ -1,9 +1,5 @@
 extends Node2D
 
-
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
 const CardSize = Vector2(125,175)
 const CardBase = preload("res://Cards/CardBase.tscn")
 const PlayerHand = preload("res://Cards/Player_Hand.gd")
@@ -16,9 +12,11 @@ onready var Hor_rad = get_viewport().size.x*0.45
 onready var Ver_rad = get_viewport().size.y*0.4
 var angle = 0
 var Card_Numb = 0
-var NumberCardsHand = -1
+var NumberCardsHand = 0
+var NumberCardsInPlay = 0
 var CardSpread = 0.25
 var OvalAngleVector = Vector2()
+
 enum{
 	InHand
 	InPlay
@@ -30,6 +28,7 @@ enum{
 }
 # Called when the node enters the scene tree for the first time.
 var CardSlotEmpty = []
+
 func _ready():
 	randomize()
 	var NewSlot = CardSlot.instance()
@@ -39,14 +38,11 @@ func _ready():
 	CardSlotEmpty.append(true)
 	pass
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
 onready var DeckPosition = $Deck.position
 onready var DiscardPosition = $Discard.position
 
 func drawcard():
-	angle = PI/2 + CardSpread*(float(NumberCardsHand)/2 - NumberCardsHand)
+	angle = PI/2 + CardSpread*(float(NumberCardsHand-1)/2 - (NumberCardsHand-1))
 	var new_card = CardBase.instance()
 	CardSelected = randi() % DeckSize
 	new_card.Cardname = PlayerHand.CardList[CardSelected]
@@ -65,33 +61,40 @@ func drawcard():
 	return DeckSize
 
 func ReParentCardInPlay(CardNo):
-	NumberCardsHand -= 1
 	Card_Numb = 0
+	NumberCardsHand -= 1
+	NumberCardsInPlay += 1
 	var Card = $Cards.get_child(CardNo)
 	$Cards.remove_child(Card)
 	$CardInPlay.add_child(Card)
+	print("Ajout")
+	print($Cards.get_children())
+	print($CardInPlay.get_children())
 	OrganiseHand()
 
-func ReParentCardInHand(CardNo):
-	NumberCardsHand += 1
+func ReParentCardInHand():
 	Card_Numb = 0
-	var Card = $CardInPlay.get_child(CardNo)
+	NumberCardsHand += 1
+	NumberCardsInPlay -= 1
+	var Card = $CardInPlay.get_child(NumberCardsInPlay)
 	$CardInPlay.remove_child(Card)
 	$Cards.add_child(Card)
+	print("Retrait")
+	print($Cards.get_children())
+	print($CardInPlay.get_children())
 	OrganiseHand()
 
 func OrganiseHand():
 	for Card in $Cards.get_children(): # reorganise hand
-		angle = PI/2 + CardSpread*(float(NumberCardsHand)/2 - Card_Numb)
+		angle = PI/2 + CardSpread*(float(NumberCardsHand-1)/2 - Card_Numb)
 		OvalAngleVector = Vector2(Hor_rad * cos(angle), - Ver_rad * sin(angle))
-		
 		Card.targetpos = CentreCardOval + OvalAngleVector - CardSize
 		Card.Cardpos = Card.targetpos # card default pos
 		Card.startrot = Card.rect_rotation
 		Card.targetrot = (90 - rad2deg(angle))/4
 		Card.Card_Numb = Card_Numb
 		Card_Numb += 1
-		if Card.state == InHand:
+		if Card.state == InHand || Card.state == InMouse :
 			Card.setup = true
 			Card.state = ReOrganiseHand
 		elif Card.state == MoveDrawnCardToHand:
