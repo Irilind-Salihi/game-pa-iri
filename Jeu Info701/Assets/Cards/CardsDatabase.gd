@@ -5,7 +5,7 @@ enum {Bois, Bronze, Fer, Marbre, Or, Pierre, Mercenary, Spearman, Mentor, Trebuc
 
 const DATA = {
 	Bois : 
-		["Ressource", 1, 1, 2, 1, "Bois", "Melee"],
+		["Ressource", 1, 1, 2, 1, "Footman", "Melee"],
 	Bronze :
 		["Ressource", 2, 1, 3, 2, "Archer", "Ranged,\nImmune to\nRetaliation"],
 	Fer :
