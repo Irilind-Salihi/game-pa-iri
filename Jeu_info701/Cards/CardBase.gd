@@ -14,6 +14,7 @@ var t = 0
 var DRAWTIME = 1
 var ORGANISETIME = 0.5
 onready var Orig_scale = rect_scale
+
 enum{
 	InHand
 	InPlay
@@ -23,10 +24,12 @@ enum{
 	ReOrganiseHand
 	MoveDrawnCardToDiscard
 }
+
 var state = InHand
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-#	print(CardInfo)
+	print(CardDatabase.get('Bois'))
 	var CardSize = rect_size
 	$Border.scale *= CardSize/$Border.texture.get_size()
 	$Card.texture = load(CardImg)
@@ -61,6 +64,7 @@ var Move_Neightbour_Card_Check = false
 var oldstate = INF
 var CARD_SELECT = true
 var INMOUSETIME = 0.1
+var MovingtoHand = false
 var MovingtoInPlay = false
 var targetscale = Vector2()
 var DiscardPile = Vector2()
@@ -255,9 +259,11 @@ func _physics_process(delta):
 					rect_position = targetpos
 					rect_scale = Orig_scale
 					MovingtoDiscard = false
+					state = InHand
+					
 
-func Move_Neighbour_Card(Card_Numb,Left,Spreadfactor):
-	NeighbourCard = $'../'.get_child(Card_Numb)
+func Move_Neighbour_Card(Card_Number,Left,Spreadfactor):
+	NeighbourCard = $'../'.get_child(Card_Number)
 	if Left:
 		NeighbourCard.targetpos = NeighbourCard.Cardpos - Spreadfactor*Vector2(65,0)
 	else:
@@ -266,11 +272,11 @@ func Move_Neighbour_Card(Card_Numb,Left,Spreadfactor):
 	NeighbourCard.state = ReOrganiseHand
 	NeighbourCard.Move_Neightbour_Card_Check = true
 
-func Reset_Card(Card_Numb):
+func Reset_Card(Card_Number):
 #    if NeighbourCard.Move_Neightbour_Card_Check:
 #        NeighbourCard.Move_Neightbour_Card_Check = false
 	if NeighbourCard.Move_Neightbour_Card_Check == false:
-		NeighbourCard = $'../'.get_child(Card_Numb)
+		NeighbourCard = $'../'.get_child(Card_Number)
 		if NeighbourCard.state != Selected:
 			NeighbourCard.state = ReOrganiseHand
 			NeighbourCard.targetpos = NeighbourCard.Cardpos
@@ -301,13 +307,13 @@ func _on_Focus_mouse_exited():
 	pass
 
 func _on_Focus_button_down():
-	print("down "+Cardname+ " - old state : "+ str(state))
+#	print("down "+Cardname+ " - old state : "+ str(state))
 	match state:
 		InHand, ReOrganiseHand:
 			state = Selected
 
 func _on_Focus_button_up():
-	print("up "+Cardname)
+#	print("up "+Cardname)
 	match state:
 		Selected:
 			state = ReOrganiseHand
@@ -316,6 +322,8 @@ func deffausseCard():
 	setup = true
 	MovingtoDiscard = true
 	targetpos = Cardpos
+	var randomAngle = (randi() % 31) - 15
+	targetrot = startrot * (randomAngle*1.0)
 	state = MoveDrawnCardToDiscard
 #
 # To do : 

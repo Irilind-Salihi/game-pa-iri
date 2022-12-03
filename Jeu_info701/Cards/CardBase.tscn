@@ -18,9 +18,6 @@ margin_right = 125.0
 margin_bottom = 175.0
 rect_pivot_offset = Vector2( 125, 175 )
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Card" type="Sprite" parent="."]
 centered = false
@@ -226,5 +223,7 @@ expand = true
 texture = ExtResource( 5 )
 centered = false
 
+[connection signal="button_down" from="Focus" to="." method="_on_Focus_button_down"]
+[connection signal="button_up" from="Focus" to="." method="_on_Focus_button_up"]
 [connection signal="mouse_entered" from="Focus" to="." method="_on_Focus_mouse_entered"]
 [connection signal="mouse_exited" from="Focus" to="." method="_on_Focus_mouse_exited"]

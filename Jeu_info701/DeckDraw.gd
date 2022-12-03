@@ -1,6 +1,5 @@
 extends TextureButton
 
-
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
@@ -10,11 +9,11 @@ var Decksize = INF
 func _ready():
 	rect_scale *= $'../../'.CardSize/rect_size
 
-
+func updateAffichage(decksize):
+	disabled = decksize == 0
 
 func _gui_input(event):
-	if Input.is_action_just_released("leftclick"):
+	Decksize = $'../../'.DeckSize
+	if Input.is_action_just_released("leftclick") && event.is_action_released("leftclick"):
 		if Decksize > 0:
-			Decksize = $'../../'.drawcard()
-			if Decksize == 0:
-				disabled = true
+			$'../../'.drawAllCard()
