@@ -14,9 +14,9 @@ script = ExtResource( 4 )
 
 [node name="CardSlots" type="Node" parent="."]
 
-[node name="Cards" type="Node" parent="."]
-
 [node name="CardInPlay" type="Node" parent="."]
+
+[node name="Cards" type="Node" parent="."]
 
 [node name="Background" type="Sprite" parent="."]
 position = Vector2( -425, -260 )
