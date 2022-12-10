@@ -250,7 +250,14 @@ func _physics_process(delta):
 			if MovingtoDiscard:
 				if setup:
 					Setup()
-					targetpos = DiscardPile
+					var randomPosX = (randi() % 25) - 12
+					var randomPosY = (randi() % 10) - 5
+
+					targetpos.x = DiscardPile.x + randomPosX
+					targetpos.y = DiscardPile.y + randomPosY
+					
+					var randomAngle = (randf()*30) - 15
+					targetrot = startrot * (randomAngle*1.0)
 				if t <= 1: # Always be a 1
 					rect_position = startpos.linear_interpolate(targetpos, t)
 					rect_scale = startscale * (1-t) + Orig_scale*t
@@ -321,9 +328,6 @@ func _on_Focus_button_up():
 func deffausseCard():
 	setup = true
 	MovingtoDiscard = true
-	targetpos = Cardpos
-	var randomAngle = (randi() % 31) - 15
-	targetrot = startrot * (randomAngle*1.0)
 	state = MoveDrawnCardToDiscard
 #
 # To do : 

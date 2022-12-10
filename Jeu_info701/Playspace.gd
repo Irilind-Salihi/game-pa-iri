@@ -167,6 +167,13 @@ func Rule():
 						break
 					_:
 						noRule()
+			"Ressource":
+				match Card.Cardname:
+					"Retour":
+						changementMenuToSousMenu("Menu")
+						break
+					_:
+						noRule()
 			_:
 				noRule()
 						
