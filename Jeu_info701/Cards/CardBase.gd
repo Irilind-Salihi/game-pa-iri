@@ -75,18 +75,26 @@ func _input(event):
 		Selected, InMouse, InPlay:
 			var CardSlots = $'../../CardSlots'
 			var CardSlotEmpty = $'../..'.CardSlotEmpty
+			############################
+			# On click
+			############################
+			# Si (la carte InPlay et si on click) ou (si on est en état dans la souris ou focus)  
 			if (state == InPlay && event.is_action_pressed("leftclick"))||(state == InMouse || state == Selected):
+				# Si on est la carte InPlay on passe dans la souris
 				if CARD_SELECT && state != InPlay:
 					oldstate = state 
 					state = InMouse
 					setup = true
 					CARD_SELECT = false
+				# On regarde à quel cardSlot on a cliqué
 				for i in range(CardSlots.get_child_count()):
 					var CardSlotPos = CardSlots.get_child(i).rect_position
 					var CardSlotSize = CardSlots.get_child(i).rect_size
 					var mousepos = get_global_mouse_position()
+					# Si on est à la position d'une cardSlot
 					if CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
 						var CardInPlay = $'../../CardInPlay'
+						# On prend la dernière carte (celle du dessus)
 						if CardInPlay.get_child_count() > 0 :
 							var LastCard = CardInPlay.get_child(CardInPlay.get_child_count()-1)
 							LastCard.oldstate = state 
@@ -94,8 +102,13 @@ func _input(event):
 							LastCard.setup = true
 							LastCard.CARD_SELECT = false
 							break
+			############################
+			# On release
+			############################
+				# Lorsqu'on relache le click
 				if event.is_action_released("leftclick"):
 					if CARD_SELECT == false:
+						# Si on était une carte focus, on regarde si on va être poser sur un cardSlot
 						if oldstate == Selected :
 							for i in range(CardSlots.get_child_count()):
 								if CardSlotEmpty[i]:
@@ -110,18 +123,21 @@ func _input(event):
 										state = InPlay
 										CARD_SELECT = true
 										break
+							# Si on a pas été posé on retourne à sa place
 							if state != InPlay:
 								setup = true
 								targetpos = Cardpos
 								state = ReOrganiseHand
-								CARD_SELECT = true							
+								CARD_SELECT = true
+						# Si on était pas une carte focus, on retourne dans le deck
 						else:
 							setup = true
 							targetpos = Cardpos
 							state = ReOrganiseHand
 							$'../../'.ReParentCardInHand()
 							CARD_SELECT = true
-							
+
+		# Brouillon d'endroit pour rediriger
 		#						setup = true
 		#						MovingtoInPlay = true
 		#						targetpos = Cardpos
@@ -135,7 +151,6 @@ func _input(event):
 		#						state = ReOrganiseHand
 		#						state = MoveDrawnCardToDiscard
 		#						CARD_SELECT = true
-
 
 func _physics_process(delta):
 	match state:
