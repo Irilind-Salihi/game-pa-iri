@@ -137,7 +137,7 @@ func _input(event):
 							$'../../'.ReParentCardInHand()
 							CARD_SELECT = true
 
-		# Brouillon d'endroit pour rediriger
+		#					Brouillon d'endroit pour rediriger la carte 
 		#						setup = true
 		#						MovingtoInPlay = true
 		#						targetpos = Cardpos
@@ -151,6 +151,7 @@ func _input(event):
 		#						state = ReOrganiseHand
 		#						state = MoveDrawnCardToDiscard
 		#						CARD_SELECT = true
+
 
 func _physics_process(delta):
 	match state:
@@ -345,6 +346,7 @@ func deffausseCard():
 	MovingtoDiscard = true
 	state = MoveDrawnCardToDiscard
 #
-# To do : 
-#	- Focus compatible sur téléphone 
-#	- _on_Focus_mouse_exited() pas trigger
+# To do (plus haut = plus important) : 
+#	- Voir la compatibilité téléphone et report les bugs + faire la doc d'installe pour le prof
+#	- Focus compatible sur téléphone (Placer la carte dans la partie basse de l'écran et elle apparait en immense) Puis disparait quand on sort ou relache la carte
+#	- 
