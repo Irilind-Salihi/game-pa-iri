@@ -1,42 +1,47 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://LoginMenu.gd" type="Script" id=1]
+[ext_resource path="res://Assets/MainMenu/CONNEXION.png" type="Texture" id=2]
+[ext_resource path="res://Assets/font/Panton-Trial-Bold.ttf" type="DynamicFontData" id=3]
+
+[sub_resource type="DynamicFont" id=2]
+size = 31
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=1]
+size = 31
+font_data = ExtResource( 3 )
 
 [node name="LoginMenu" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
 
-[node name="loginContainer" type="VBoxContainer" parent="."]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -39.5
-margin_top = -38.0
-margin_right = 39.5
-margin_bottom = 38.0
+[node name="loginRequest" type="HTTPRequest" parent="."]
 
-[node name="usernameInput" type="LineEdit" parent="loginContainer"]
-margin_right = 79.0
-margin_bottom = 24.0
-placeholder_text = "Utilisateur"
-
-[node name="passwordInput" type="LineEdit" parent="loginContainer"]
-margin_top = 28.0
-margin_right = 79.0
-margin_bottom = 52.0
+[node name="passwordInput" type="LineEdit" parent="."]
+margin_left = 90.0
+margin_top = 372.0
+margin_right = 531.0
+margin_bottom = 550.0
+custom_fonts/font = SubResource( 2 )
+secret = true
+secret_character = "-"
 placeholder_text = "Mot De passe"
 
-[node name="loginButton" type="Button" parent="loginContainer"]
-margin_top = 56.0
-margin_right = 79.0
-margin_bottom = 76.0
-text = "Connexion"
+[node name="usernameInput" type="LineEdit" parent="."]
+margin_left = 92.0
+margin_top = 157.0
+margin_right = 533.0
+margin_bottom = 323.0
+custom_fonts/font = SubResource( 1 )
+placeholder_text = "Utilisateur"
 
-[node name="loginRequest" type="HTTPRequest" parent="loginContainer/loginButton"]
+[node name="connexionTouchScreen" type="TouchScreenButton" parent="."]
+position = Vector2( 97, 712 )
+scale = Vector2( 0.257386, 0.3375 )
+normal = ExtResource( 2 )
 
-[connection signal="text_changed" from="loginContainer/usernameInput" to="." method="_on_usernameInput_text_changed"]
-[connection signal="text_entered" from="loginContainer/passwordInput" to="." method="_on_passwordInput_text_entered"]
-[connection signal="pressed" from="loginContainer/loginButton" to="." method="_on_loginButton_pressed"]
-[connection signal="request_completed" from="loginContainer/loginButton/loginRequest" to="." method="_on_loginRequest_request_completed"]
+[connection signal="request_completed" from="loginRequest" to="." method="_on_loginRequest_request_completed"]
+[connection signal="text_entered" from="passwordInput" to="." method="_on_passwordInput_text_entered"]
+[connection signal="text_changed" from="usernameInput" to="." method="_on_usernameInput_text_changed"]

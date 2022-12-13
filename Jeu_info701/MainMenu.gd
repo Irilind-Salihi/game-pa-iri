@@ -22,15 +22,15 @@ func loadAccess():
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
-	$startTouchScreen.position.x =get_viewport().size.x * 0.18
+	$startTouchScreen.position.x =get_viewport().size.x * 0.13
 	$startTouchScreen.position.y =get_viewport().size.y * 0.25
 	$startTouchScreen.scale = Vector2(500,100) / $startTouchScreen.normal.get_size()
 	
-	$statsTouchScreen.position.x =get_viewport().size.x * 0.18
+	$statsTouchScreen.position.x =get_viewport().size.x * 0.13
 	$statsTouchScreen.position.y =get_viewport().size.y * 0.50
 	$statsTouchScreen.scale = Vector2(500,100) / $statsTouchScreen.normal.get_size()
 	
-	$loginTouchScreen.position.x =get_viewport().size.x * 0.18
+	$loginTouchScreen.position.x =get_viewport().size.x * 0.13
 	$loginTouchScreen.position.y =get_viewport().size.y * 0.75
 	$loginTouchScreen.scale = Vector2(500,100) / $loginTouchScreen.normal.get_size()
 	
