@@ -24,7 +24,6 @@ texture = ExtResource( 1 )
 centered = false
 
 [node name="Deck" type="Node2D" parent="."]
-position = Vector2( 550, 50 )
 __meta__ = {
 "_edit_group_": true
 }
@@ -39,7 +38,6 @@ texture_disabled = ExtResource( 3 )
 script = ExtResource( 5 )
 
 [node name="Discard" type="Node2D" parent="."]
-position = Vector2( 550, 750 )
 __meta__ = {
 "_edit_group_": true
 }

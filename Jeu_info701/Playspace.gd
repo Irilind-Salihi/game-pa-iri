@@ -3,7 +3,7 @@ extends Node2D
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-const CardSize = Vector2(125,175)
+var CardSize = Vector2(125,175)
 const CardBase = preload("res://Cards/CardBase.tscn")
 const PlayerHand = preload("res://Cards/Player_Hand.gd")
 const CardSlot = preload("res://Cards/CardSlot.tscn")
@@ -33,19 +33,24 @@ enum{
 }
 # Called when the node enters the scene tree for the first time.
 var CardSlotEmpty = []
+func _enter_tree():
+	CardSize = (get_viewport().size * (Vector2(1.2,0.9))) * 0.18
+	
 func _ready():
 	randomize()
 	var NewSlot = CardSlot.instance()
-	NewSlot.rect_position = get_viewport().size * 0.4
 	NewSlot.rect_size = CardSize
+	NewSlot.rect_position = get_viewport().size * 0.5 - CardSize/2
 	$CardSlots.add_child(NewSlot)
 	CardSlotEmpty.append(true)
+	$Background.position = Vector2(0,0)
+	$Background.scale = get_viewport().size/$Background.texture.get_size()
 	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
-onready var DeckPosition = $Deck.position
+onready var DeckPosition = $Deck/DeckDraw.rect_position
 onready var DiscardPosition = $Discard.position
 
 func drawAllCard():
