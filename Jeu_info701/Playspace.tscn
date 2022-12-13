@@ -28,13 +28,11 @@ __meta__ = {
 "_edit_group_": true
 }
 
-[node name="DeckDraw" type="TextureButton" parent="Deck"]
-margin_right = 40.0
-margin_bottom = 40.0
-texture_normal = ExtResource( 2 )
-texture_pressed = ExtResource( 2 )
-texture_hover = ExtResource( 2 )
-texture_disabled = ExtResource( 3 )
+[node name="DeckDraw" type="TouchScreenButton" parent="Deck"]
+normal = ExtResource( 2 )
+pressed = ExtResource( 2 )
+shape_centered = false
+shape_visible = false
 script = ExtResource( 5 )
 
 [node name="Discard" type="Node2D" parent="."]
@@ -50,3 +48,5 @@ texture_pressed = ExtResource( 2 )
 texture_hover = ExtResource( 2 )
 texture_disabled = ExtResource( 3 )
 script = ExtResource( 6 )
+
+[connection signal="pressed" from="Deck/DeckDraw" to="Deck/DeckDraw" method="_on_DeckDraw_pressed"]

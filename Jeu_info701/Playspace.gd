@@ -1,8 +1,5 @@
 extends Node2D
 
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
 var CardSize = Vector2(125,175)
 const CardBase = preload("res://Cards/CardBase.tscn")
 const PlayerHand = preload("res://Cards/Player_Hand.gd")
@@ -50,14 +47,14 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
-onready var DeckPosition = $Deck/DeckDraw.rect_position
+onready var DeckPosition = $Deck/DeckDraw.position
 onready var DiscardPosition = $Discard.position
 
 func drawAllCard():
 	DeckSize = PlayerHand.CardList[currentDeck].size()
 	while (DeckSize > 0):
 #		print(DeckSize)
-		$Deck.get_node("DeckDraw").updateAffichage(DeckSize)
+
 		DeckSize = drawcard()
 		var t = Timer.new()
 		t.set_wait_time(0.4)
@@ -66,7 +63,7 @@ func drawAllCard():
 		t.start()
 		yield(t, "timeout")
 		t.queue_free()
-		$Deck.get_node("DeckDraw").updateAffichage(DeckSize)
+
 
 func drawcard():
 	DeckSize = PlayerHand.CardList[currentDeck].size()
