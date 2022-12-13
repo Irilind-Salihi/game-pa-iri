@@ -11,8 +11,8 @@ var targetpos = Vector2()
 var startrot = 0
 var targetrot = 0
 var t = 0
-var DRAWTIME = 1
-var ORGANISETIME = 0.5
+var DRAWTIME = 0.5
+var ORGANISETIME = 0.2
 onready var Orig_scale = rect_scale
 
 enum{
@@ -23,13 +23,14 @@ enum{
 	MoveDrawnCardToHand
 	ReOrganiseHand
 	MoveDrawnCardToDiscard
+	MoveDrawnCardToDeck
 }
 
 var state = InHand
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	print(CardDatabase.get('Bois'))
+#	print(CardDatabase.get('Bois'))
 	var CardSize = rect_size
 	$Border.scale *= CardSize/$Border.texture.get_size()
 	$Card.texture = load(CardImg)
@@ -67,8 +68,12 @@ var INMOUSETIME = 0.1
 var MovingtoHand = false
 var MovingtoInPlay = false
 var targetscale = Vector2()
+
 var DiscardPile = Vector2()
 var MovingtoDiscard = false
+
+var DeckPile = Vector2()
+var MovingtoDeck = false
 
 func _input(event):
 	match state:
@@ -132,9 +137,7 @@ func _input(event):
 						# Si on était pas une carte focus, on retourne dans le deck
 						else:
 							setup = true
-							targetpos = Cardpos
 							state = ReOrganiseHand
-							$'../../'.ReParentCardInHand()
 							CARD_SELECT = true
 
 		#					Brouillon d'endroit pour rediriger la carte 
@@ -261,7 +264,7 @@ func _physics_process(delta):
 				rect_position = targetpos
 				rect_rotation = targetrot
 				rect_scale = Orig_scale
-				state = InHand
+				state = InHand		
 		MoveDrawnCardToDiscard:
 			if MovingtoDiscard:
 				if setup:
@@ -283,7 +286,28 @@ func _physics_process(delta):
 					rect_scale = Orig_scale
 					MovingtoDiscard = false
 					state = InHand
-					
+		MoveDrawnCardToDeck:
+			if MovingtoDeck:
+				if setup:
+					Setup()
+					targetpos = DeckPile
+					targetrot = 0
+				if t <= 1: # Always be a 1
+					rect_position = startpos.linear_interpolate(targetpos, t)
+					rect_scale = startscale * (1-t) + Orig_scale*t
+					rect_scale.x = Orig_scale.x * abs(2*t - 1)
+					rect_rotation = startrot * (1-t) + targetrot*t
+					startrot * (1-t) + targetrot*t
+					if !$CardBack.visible:
+						if t >= 0.5:
+							$CardBack.visible = true
+					t += delta/float(DRAWTIME)
+				else:
+					rect_position = targetpos
+					rect_rotation = 0
+					rect_scale = Orig_scale
+					MovingtoDeck = false
+					self.queue_free()
 
 func Move_Neighbour_Card(Card_Number,Left,Spreadfactor):
 	NeighbourCard = $'../'.get_child(Card_Number)
@@ -313,6 +337,7 @@ func Setup():
 	setup = false
 
 func _on_Focus_mouse_entered():
+#	printState()
 #	match state:
 #		InHand, ReOrganiseHand:
 #			setup = true
@@ -345,7 +370,33 @@ func deffausseCard():
 	setup = true
 	MovingtoDiscard = true
 	state = MoveDrawnCardToDiscard
-#
+
+func returnDeckCard():
+	setup = true
+	MovingtoDiscard = true
+	state = MoveDrawnCardToDiscard
+
+func printState():
+	match state:
+		0:
+			print(Cardname, " : InHand")
+		1:
+			print(Cardname, " : InPlay")
+		2:
+			print(Cardname, " : InMouse")
+		3:
+			print(Cardname, " : Selected")
+		4:
+			print(Cardname, " : MoveDrawnCardToHand")
+		5:
+			print(Cardname, " : ReOrganiseHand")
+		6:
+			print(Cardname, " : MoveDrawnCardToDiscard")
+		7:
+			print(Cardname, " : MoveDrawnCardToDeck")
+		_:
+			print("error unknow state")
+
 # To do (plus haut = plus important) : 
 #	- Voir la compatibilité téléphone et report les bugs + faire la doc d'installe pour le prof
 #	- Focus compatible sur téléphone (Placer la carte dans la partie basse de l'écran et elle apparait en immense) Puis disparait quand on sort ou relache la carte

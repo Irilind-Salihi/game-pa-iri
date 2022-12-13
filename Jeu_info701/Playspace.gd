@@ -29,6 +29,7 @@ enum{
 	MoveDrawnCardToHand
 	ReOrganiseHand
 	MoveDrawnCardToDiscard
+	MoveDrawnCardToDeck
 }
 # Called when the node enters the scene tree for the first time.
 var CardSlotEmpty = []
@@ -74,6 +75,7 @@ func drawcard():
 #	print(new_card.Cardname)
 	new_card.rect_position = DeckPosition - CardSize/2
 	new_card.DiscardPile = DiscardPosition - CardSize/2
+	new_card.DeckPile = DeckPosition - CardSize/2
 	new_card.rect_scale *= CardSize/new_card.rect_size
 	new_card.state = MoveDrawnCardToHand
 	Card_Numb = 0
@@ -87,6 +89,7 @@ func drawcard():
 	return DeckSize
 
 func ReParentCardInPlay(CardNo):
+	print("Reparent in play")
 	NumberCardsHand -= 1
 	NumberCardsInPlay += 1
 	Card_Numb = 0
@@ -98,18 +101,29 @@ func ReParentCardInPlay(CardNo):
 #	print($CardInPlay.get_children())
 	OrganiseHand()
 	Rule()
+	print(NumberCardsInPlay)
 
 func ReParentCardInHand():
-	NumberCardsHand += 1
-	Card_Numb = 0
+	print("Reparent in hand")
+	print(NumberCardsInPlay)
 	NumberCardsInPlay -= 1
 	var Card = $CardInPlay.get_child(NumberCardsInPlay)
-	$CardInPlay.remove_child(Card)
-	$Cards.add_child(Card)
-#	print("Retrait")
-#	print($Cards.get_children())
-#	print($CardInPlay.get_children())
-	OrganiseHand()
+	print("Card deck : ",Card.CardInfo[0])
+	print("Current deck : ",currentDeck)
+	if (Card.CardInfo[0] == currentDeck):
+		NumberCardsHand += 1
+		Card_Numb = 0
+		Card.setup = true
+		Card.state = MoveDrawnCardToHand
+		$CardInPlay.remove_child(Card)
+		$Cards.add_child(Card)
+		OrganiseHand()
+	else:
+		PlayerHand.CardList[Card.CardInfo[0]].append(Card.Cardname)
+		Card.setup = true
+		Card.MovingtoDeck = true
+		Card.state = MoveDrawnCardToDeck
+		
 
 func OrganiseHand():
 	for Card in $Cards.get_children(): # reorganise hand
@@ -178,6 +192,7 @@ func Rule():
 				noRule()
 						
 func changementMenuToSousMenu(newDeck):
+	print("Change de Deck")
 	var GetTimeCard = CardBase.instance()
 	var WAITINGTIME = GetTimeCard.DRAWTIME * (NumberCardsHand+1)*2
 	print(WAITINGTIME)
@@ -208,7 +223,7 @@ func changementMenuToSousMenu(newDeck):
 	Card.deffausseCard()
 
 		
-	print($CardsInDiscard.get_children())
+#	print($CardsInDiscard.get_children())
 	
 	nouveauDeck = newDeck
 	print("Lancement du minuteur.")

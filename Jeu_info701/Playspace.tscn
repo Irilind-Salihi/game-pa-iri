@@ -37,9 +37,6 @@ texture_pressed = ExtResource( 2 )
 texture_hover = ExtResource( 2 )
 texture_disabled = ExtResource( 3 )
 script = ExtResource( 5 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Discard" type="Node2D" parent="."]
 position = Vector2( 550, 750 )
