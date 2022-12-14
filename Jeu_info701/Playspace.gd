@@ -19,6 +19,7 @@ var NumberCardsInPlay = 0
 var CardSpread = 0.25
 var OvalAngleVector = Vector2()
 var newTurn = true
+
 enum{
 	InHand
 	InPlay
@@ -29,6 +30,7 @@ enum{
 	MoveDrawnCardToDiscard
 	MoveDrawnCardToDeck
 }
+
 # Called when the node enters the scene tree for the first time.
 var CardSlotEmpty = []
 func _enter_tree():
@@ -75,7 +77,6 @@ func drawAllCard():
 ##				CardNeedToConnect.connect("selected")
 #				pass
 
-
 func drawcard(deckToDraw):
 	DeckSize = PlayerHand.CardList[deckToDraw].size()
 	angle = PI/2 + CardSpread*(float(NumberCardsHand)/2 - NumberCardsHand)
@@ -87,6 +88,7 @@ func drawcard(deckToDraw):
 	new_card.DeckPile = DeckPosition 
 	new_card.rect_scale *= CardSize/new_card.rect_size
 	new_card.state = MoveDrawnCardToHand
+	new_card.connect("selected", self , "cardSelected")
 	Card_Numb = 0
 	
 	$Cards.add_child(new_card)
@@ -96,6 +98,81 @@ func drawcard(deckToDraw):
 	NumberCardsHand += 1
 	OrganiseHand()
 	return DeckSize
+
+var alreadyGrab = false
+var cardAlreadyGrab = null
+
+func drag(Card):
+	if Card.CARD_SELECT && Card.state != InPlay:
+		Card.oldstate = Card.state 
+		Card.state = InMouse
+		Card.setup = true
+		Card.CARD_SELECT = false
+		
+	# On regarde à quel cardSlot on a cliqué
+	for i in range($CardSlots.get_child_count()):
+		var CardSlotPos = $CardSlots.get_child(i).rect_position
+		var CardSlotSize = $CardSlots.get_child(i).rect_size
+		var mousepos = get_global_mouse_position()
+#					print(mousepos)
+		# Si on est à la position d'une cardSlot
+		if Card.CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
+			var CardInPlay = $'../../CardInPlay'
+			# On prend la dernière carte (celle du dessus)
+			if CardInPlay.get_child_count() > 0 :
+				var LastCard = CardInPlay.get_child(CardInPlay.get_child_count()-1)
+				LastCard.oldstate = Card.state 
+				LastCard.state = InMouse
+				LastCard.setup = true
+				LastCard.CARD_SELECT = false
+				break
+
+func drop(Card):
+	if Card.CARD_SELECT == false:
+		# Si on était une carte focus, on regarde si on va être poser sur un cardSlot
+		if Card.oldstate == Selected :
+			for i in range($CardSlots.get_child_count()):
+				if CardSlotEmpty[i]:
+					var CardSlotPos = $CardSlots.get_child(i).rect_position
+					var CardSlotSize = $CardSlots.get_child(i).rect_size
+					var mousepos = get_global_mouse_position()
+					if mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
+						Card.setup = true
+						Card.MovingtoInPlay = true
+						Card.targetpos = CardSlotPos 
+						Card.targetscale = CardSlotSize/Card.rect_size
+						Card.state = InPlay
+						Card.CARD_SELECT = true
+						break
+			# Si on a pas été posé on retourne à sa place
+			if Card.state != InPlay:
+				Card.setup = true
+				Card.targetpos = Card.Cardpos
+				Card.state = ReOrganiseHand
+				Card.CARD_SELECT = true
+		# Si on était pas une carte focus, on retourne dans le deck
+		else:
+			Card.setup = true
+			Card.state = ReOrganiseHand
+			Card.CARD_SELECT = true
+
+func cardSelected(Card, grabbed):
+	if grabbed:
+		print("Grab")
+		if !alreadyGrab:
+			alreadyGrab = true
+			cardAlreadyGrab = Card
+			drag(Card)
+		else:
+			if Card.Card_Numb > cardAlreadyGrab.Card_Numb:
+				drop(cardAlreadyGrab)
+				drag(Card)
+				cardAlreadyGrab = Card
+	else:
+		print("Release")
+		drop(Card)
+		alreadyGrab = false
+		cardAlreadyGrab = null
 
 func ReParentCardInPlay(CardNo):
 	print("Reparent in play")

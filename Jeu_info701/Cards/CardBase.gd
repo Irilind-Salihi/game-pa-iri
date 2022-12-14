@@ -80,73 +80,16 @@ func _input(event):
 #	var event_postion = get_canvas_transform().xform_inv(event.position)
 	match state:
 		Selected, InMouse, InPlay:
-			var CardSlots = $'../../CardSlots'
-			var CardSlotEmpty = $'../..'.CardSlotEmpty
-			############################
-			# On click
-			############################
+			if event is InputEventScreenTouch && event.is_pressed():
+				emit_signal("selected", self, true)
 			# Si (la carte InPlay et si on click) ou (si on est en état dans la souris ou focus)  
-			if (state == InPlay &&  event is InputEventScreenTouch)||(state == InMouse || state == Selected):
+			if (state == InPlay && event is InputEventScreenTouch)||(state == InMouse || state == Selected):
 
 				# Si on est la carte InPlay on passe dans la souris
-				if CARD_SELECT && state != InPlay:
-					oldstate = state 
-					state = InMouse
-					setup = true
-					CARD_SELECT = false
-					
-				# On regarde à quel cardSlot on a cliqué
-				for i in range(CardSlots.get_child_count()):
-					var CardSlotPos = CardSlots.get_child(i).rect_position
-					var CardSlotSize = CardSlots.get_child(i).rect_size
-					var mousepos = get_global_mouse_position()
-#					print(mousepos)
-					
-					# Si on est à la position d'une cardSlot
-					if CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
-						var CardInPlay = $'../../CardInPlay'
-						# On prend la dernière carte (celle du dessus)
-						if CardInPlay.get_child_count() > 0 :
-							var LastCard = CardInPlay.get_child(CardInPlay.get_child_count()-1)
-							LastCard.oldstate = state 
-							LastCard.state = InMouse
-							LastCard.setup = true
-							LastCard.CARD_SELECT = false
-							break
-							
-			############################
-			# On release
-			############################
 				# Lorsqu'on relache le click
 				if event is InputEventScreenTouch && !event.is_pressed():
-					if CARD_SELECT == false:
-						# Si on était une carte focus, on regarde si on va être poser sur un cardSlot
-						if oldstate == Selected :
-							for i in range(CardSlots.get_child_count()):
-								if CardSlotEmpty[i]:
-									var CardSlotPos = CardSlots.get_child(i).rect_position
-									var CardSlotSize = CardSlots.get_child(i).rect_size
-									var mousepos = get_global_mouse_position()
-									if mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
-										setup = true
-										MovingtoInPlay = true
-										targetpos = CardSlotPos 
-										targetscale = CardSlotSize/rect_size
-										state = InPlay
-										CARD_SELECT = true
-										break
-							# Si on a pas été posé on retourne à sa place
-							if state != InPlay:
-								setup = true
-								targetpos = Cardpos
-								state = ReOrganiseHand
-								CARD_SELECT = true
-						# Si on était pas une carte focus, on retourne dans le deck
-						else:
-							setup = true
-							state = ReOrganiseHand
-							CARD_SELECT = true
-
+					emit_signal("selected", self, false)
+					
 		#					Brouillon d'endroit pour rediriger la carte 
 		#						setup = true
 		#						MovingtoInPlay = true
@@ -366,13 +309,13 @@ func Setup():
 
 
 func _on_TouchCard_pressed():
-	print("down "+Cardname+ " - old state : "+ str(state))
+#	print("down "+Cardname+ " - old state : "+ str(state))
 	match state:
 		InHand, ReOrganiseHand:
 			state = Selected
 
 func _on_TouchCard_released():
-	print("up "+Cardname)
+#	print("up "+Cardname)
 	match state:
 		Selected:
 			state = ReOrganiseHand
