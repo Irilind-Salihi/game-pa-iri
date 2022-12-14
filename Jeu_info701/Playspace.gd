@@ -10,7 +10,7 @@ var nouveauDeck = ""
 onready var DeckSize = PlayerHand.CardList[currentDeck].size()
 var CardOffset = Vector2()
 onready var CentreCardOval = get_viewport().size * Vector2(0.5, 1.25)
-onready var Hor_rad = get_viewport().size.x*0.45
+onready var Hor_rad = get_viewport().size.x*0.5
 onready var Ver_rad = get_viewport().size.y*0.4
 var angle = 0
 var Card_Numb = 0
@@ -54,6 +54,7 @@ onready var DeckPosition = $Deck/DeckDraw.position
 onready var DiscardPosition = $Discard.position
 
 func drawAllCard():
+	print($CardSlots.get_child(0).rect_position - $CardSlots.get_child(0).get_node("Sprite").texture.get_size()/2)
 #	DeckSize = PlayerHand.CardList[currentDeck].size()
 	if newTurn:
 		var listToDraw = ["Ressource","Ressource","Batiment","Batiment", "Unite", "Unite"]
@@ -104,6 +105,7 @@ var cardAlreadyGrab = null
 
 func drag(Card):
 	if Card.CARD_SELECT && Card.state != InPlay:
+		print("Dans la main")
 		Card.oldstate = Card.state 
 		Card.state = InMouse
 		Card.setup = true
@@ -116,11 +118,11 @@ func drag(Card):
 		var mousepos = get_global_mouse_position()
 #					print(mousepos)
 		# Si on est à la position d'une cardSlot
-		if Card.CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
-			var CardInPlay = $'../../CardInPlay'
+		if Card.CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:			
 			# On prend la dernière carte (celle du dessus)
-			if CardInPlay.get_child_count() > 0 :
-				var LastCard = CardInPlay.get_child(CardInPlay.get_child_count()-1)
+			print("Take the card in play")
+			if $CardInPlay.get_child_count() > 0 :
+				var LastCard = $CardInPlay.get_child($CardInPlay.get_child_count()-1)
 				LastCard.oldstate = Card.state 
 				LastCard.state = InMouse
 				LastCard.setup = true
@@ -133,13 +135,13 @@ func drop(Card):
 		if Card.oldstate == Selected :
 			for i in range($CardSlots.get_child_count()):
 				if CardSlotEmpty[i]:
-					var CardSlotPos = $CardSlots.get_child(i).rect_position
 					var CardSlotSize = $CardSlots.get_child(i).rect_size
+					var CardSlotPos = $CardSlots.get_child(i).rect_position + CardSlotSize/2
 					var mousepos = get_global_mouse_position()
 					if mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
 						Card.setup = true
 						Card.MovingtoInPlay = true
-						Card.targetpos = CardSlotPos 
+						Card.targetpos = CardSlotPos - CardSize/2
 						Card.targetscale = CardSlotSize/Card.rect_size
 						Card.state = InPlay
 						Card.CARD_SELECT = true
@@ -155,24 +157,31 @@ func drop(Card):
 			Card.setup = true
 			Card.state = ReOrganiseHand
 			Card.CARD_SELECT = true
+			ReParentCardInHand()
 
 func cardSelected(Card, grabbed):
 	if grabbed:
-		print("Grab")
+		print(Card.Card_Numb)
 		if !alreadyGrab:
+			print("Grab")
 			alreadyGrab = true
 			cardAlreadyGrab = Card
 			drag(Card)
 		else:
-			if Card.Card_Numb > cardAlreadyGrab.Card_Numb:
-				drop(cardAlreadyGrab)
-				drag(Card)
-				cardAlreadyGrab = Card
+			if Card.state != InPlay && cardAlreadyGrab.state != InPlay:
+				print(cardAlreadyGrab.Card_Numb)
+				if Card.Card_Numb > cardAlreadyGrab.Card_Numb:
+					drop(cardAlreadyGrab)
+					drag(Card)
+					cardAlreadyGrab = Card
 	else:
 		print("Release")
 		drop(Card)
 		alreadyGrab = false
 		cardAlreadyGrab = null
+		print(alreadyGrab)
+		print(cardAlreadyGrab)
+			
 
 func ReParentCardInPlay(CardNo):
 	print("Reparent in play")
@@ -191,25 +200,25 @@ func ReParentCardInPlay(CardNo):
 
 func ReParentCardInHand():
 	print("Reparent in hand")
-	print(NumberCardsInPlay)
+#	print(NumberCardsInPlay)
 	NumberCardsInPlay -= 1
 	var Card = $CardInPlay.get_child(NumberCardsInPlay)
-	print("Card deck : ",Card.CardInfo[0])
-	print("Current deck : ",currentDeck)
-	if (Card.CardInfo[0] == currentDeck):
-		NumberCardsHand += 1
-		Card_Numb = 0
-		Card.setup = true
-		Card.state = MoveDrawnCardToHand
-		$CardInPlay.remove_child(Card)
-		$Cards.add_child(Card)
-		OrganiseHand()
-	else:
-		PlayerHand.CardList[Card.CardInfo[0]].append(Card.Cardname)
-		Card.setup = true
-		Card.MovingtoDeck = true
-		Card.state = MoveDrawnCardToDeck
-		
+#	print("Card deck : ",Card.CardInfo[0])
+#	print("Current deck : ",currentDeck)
+#	if (Card.CardInfo[0] == currentDeck):
+	NumberCardsHand += 1
+	Card_Numb = 0
+	Card.setup = true
+	Card.state = MoveDrawnCardToHand
+	$CardInPlay.remove_child(Card)
+	$Cards.add_child(Card)
+	OrganiseHand()
+#	else:
+#		PlayerHand.CardList[Card.CardInfo[0]].append(Card.Cardname)
+#		Card.setup = true
+#		Card.MovingtoDeck = true
+#		Card.state = MoveDrawnCardToDeck
+#
 
 func OrganiseHand():
 	for Card in $Cards.get_children(): # reorganise hand

@@ -15,6 +15,7 @@ var t = 0
 var DRAWTIME = 0.5
 var ORGANISETIME = 0.2
 onready var Orig_scale = rect_scale
+var firstTime = true
 
 enum{
 	InHand
@@ -80,30 +81,29 @@ func _input(event):
 #	var event_postion = get_canvas_transform().xform_inv(event.position)
 	match state:
 		Selected, InMouse, InPlay:
-			if event is InputEventScreenTouch && event.is_pressed():
-				emit_signal("selected", self, true)
 			# Si (la carte InPlay et si on click) ou (si on est en état dans la souris ou focus)  
-			if (state == InPlay && event is InputEventScreenTouch)||(state == InMouse || state == Selected):
+			if (state == InPlay && (event is InputEventScreenTouch && event.is_pressed()))||(state == InMouse || state == Selected):
+				emit_signal("selected", self, true)
 
-				# Si on est la carte InPlay on passe dans la souris
-				# Lorsqu'on relache le click
-				if event is InputEventScreenTouch && !event.is_pressed():
-					emit_signal("selected", self, false)
+			# Si on est la carte InPlay on passe dans la souris
+			# Lorsqu'on relache le click
+			if event is InputEventScreenTouch && !event.is_pressed():
+				emit_signal("selected", self, false)
 					
-		#					Brouillon d'endroit pour rediriger la carte 
-		#						setup = true
-		#						MovingtoInPlay = true
-		#						targetpos = Cardpos
-		#						targetscale = CardSlotSize/rect_size
-		#						state = InPlay
-		#						CARD_SELECT = true
-							
-		#						setup = true
-		#						MovingtoDiscard = true
-		#						targetpos = Cardpos
-		#						state = ReOrganiseHand
-		#						state = MoveDrawnCardToDiscard
-		#						CARD_SELECT = true
+#					Brouillon d'endroit pour rediriger la carte 
+#						setup = true
+#						MovingtoInPlay = true
+#						targetpos = Cardpos
+#						targetscale = CardSlotSize/rect_size
+#						state = InPlay
+#						CARD_SELECT = true
+					
+#						setup = true
+#						MovingtoDiscard = true
+#						targetpos = Cardpos
+#						state = ReOrganiseHand
+#						state = MoveDrawnCardToDiscard
+#						CARD_SELECT = true
 
 
 func _physics_process(delta):
@@ -182,12 +182,15 @@ func _physics_process(delta):
 			if t <= 1: # Always be a 1
 				rect_position = startpos.linear_interpolate(targetpos, t)
 				rect_rotation = startrot * (1-t) + targetrot*t
-				rect_scale.x = Orig_scale.x * abs(2*t - 1)
+				if firstTime:
+					rect_scale.x = Orig_scale.x * abs(2*t - 1)
 				if $CardBack.visible:
 					if t >= 0.5:
 						$CardBack.visible = false
 				t += delta/float(DRAWTIME)
 			else:
+				if firstTime:
+					firstTime = false
 				rect_position = targetpos
 				rect_rotation = targetrot
 				state = InHand
@@ -250,7 +253,6 @@ func _physics_process(delta):
 					rect_scale = startscale * (1-t) + Orig_scale*t
 					rect_scale.x = Orig_scale.x * abs(2*t - 1)
 					rect_rotation = startrot * (1-t) + targetrot*t
-					startrot * (1-t) + targetrot*t
 					if !$CardBack.visible:
 						if t >= 0.5:
 							$CardBack.visible = true

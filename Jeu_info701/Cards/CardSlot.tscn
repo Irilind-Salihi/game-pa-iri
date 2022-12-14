@@ -4,8 +4,8 @@
 [ext_resource path="res://Cards/CardSlot.gd" type="Script" id=2]
 
 [node name="CardSlot" type="MarginContainer"]
-margin_right = 40.0
-margin_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="."]
