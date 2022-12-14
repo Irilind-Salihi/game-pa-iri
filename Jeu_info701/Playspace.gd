@@ -29,6 +29,7 @@ enum{
 	ReOrganiseHand
 	MoveDrawnCardToDiscard
 	MoveDrawnCardToDeck
+	Discard
 }
 
 # Called when the node enters the scene tree for the first time.
@@ -51,7 +52,7 @@ func _ready():
 #func _process(delta):
 #	pass
 onready var DeckPosition = $Deck/DeckDraw.position
-onready var DiscardPosition = $Discard.position
+onready var DiscardPosition = $Discard/DiscardPile.rect_position
 
 func drawAllCard():
 	print($CardSlots.get_child(0).rect_position - $CardSlots.get_child(0).get_node("Sprite").texture.get_size()/2)
@@ -70,6 +71,10 @@ func drawAllCard():
 		newTurn = false
 	else:
 		print("Termine le tour")
+		for allCardInPlay in $CardInPlay.get_children():
+			allCardInPlay.deffausseCard()
+		for allCardInHand in $Cards.get_children():
+			allCardInHand.deffausseCard()
 			
 	
 #	for CardToConnect in $Cards.get_children():
@@ -84,8 +89,8 @@ func drawcard(deckToDraw):
 	var new_card = CardBase.instance()
 	CardSelected = randi() % DeckSize
 	new_card.Cardname = PlayerHand.CardList[deckToDraw][CardSelected]
-	new_card.rect_position = DeckPosition - CardSize/2
-	new_card.DiscardPile = DiscardPosition - CardSize/2
+	new_card.rect_position = DeckPosition
+	new_card.DiscardPile = DiscardPosition
 	new_card.DeckPile = DeckPosition 
 	new_card.rect_scale *= CardSize/new_card.rect_size
 	new_card.state = MoveDrawnCardToHand

@@ -26,6 +26,7 @@ enum{
 	ReOrganiseHand
 	MoveDrawnCardToDiscard
 	MoveDrawnCardToDeck
+	Discard
 }
 
 var state = InHand
@@ -108,9 +109,10 @@ func _input(event):
 
 func _physics_process(delta):
 	match state:
+		Discard:
+			pass
 		InHand:
 			pass
-			
 		InPlay:
 			if MovingtoHand:
 				if setup:
@@ -241,7 +243,7 @@ func _physics_process(delta):
 					rect_position = targetpos
 					rect_scale = Orig_scale
 					MovingtoDiscard = false
-					state = InHand
+					state = Discard
 		MoveDrawnCardToDeck:
 			if MovingtoDeck:
 				if setup:
