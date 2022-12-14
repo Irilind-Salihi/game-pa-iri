@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Batiment.png-7e1e2ed2ae7c3d94640f0a8ce087e209.stex"
+path="res://.import/Cabane.png-80b4f37a599d5a53d8b5517dfd7039c5.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Cards/Menu/Batiment.png"
-dest_files=[ "res://.import/Batiment.png-7e1e2ed2ae7c3d94640f0a8ce087e209.stex" ]
+source_file="res://Assets/Cards/Batiment/Cabane.png"
+dest_files=[ "res://.import/Cabane.png-80b4f37a599d5a53d8b5517dfd7039c5.stex" ]
 
 [params]
 

@@ -1,5 +1,6 @@
 extends MarginContainer
 
+signal selected
 
 # Declare member variables here. Examples:
 onready var CardDatabase = preload("res://Assets/Cards/CardsDatabase.gd")
@@ -36,7 +37,7 @@ func _ready():
 	$Card.texture = load(CardImg)
 	$Card.scale *= CardSize/$Card.texture.get_size()
 	$CardBack.scale *= CardSize/$CardBack.texture.get_size()
-	$Focus.rect_scale *= CardSize/$Focus.rect_size
+	$TouchCard.scale *= CardSize/($TouchCard.normal.get_size())
 	
 	var Attack = str(CardInfo[1])
 	var Retaliation = str(CardInfo[2])
@@ -76,6 +77,7 @@ var DeckPile = Vector2()
 var MovingtoDeck = false
 
 func _input(event):
+#	var event_postion = get_canvas_transform().xform_inv(event.position)
 	match state:
 		Selected, InMouse, InPlay:
 			var CardSlots = $'../../CardSlots'
@@ -84,18 +86,22 @@ func _input(event):
 			# On click
 			############################
 			# Si (la carte InPlay et si on click) ou (si on est en état dans la souris ou focus)  
-			if (state == InPlay && event.is_action_pressed("leftclick"))||(state == InMouse || state == Selected):
+			if (state == InPlay &&  event is InputEventScreenTouch)||(state == InMouse || state == Selected):
+
 				# Si on est la carte InPlay on passe dans la souris
 				if CARD_SELECT && state != InPlay:
 					oldstate = state 
 					state = InMouse
 					setup = true
 					CARD_SELECT = false
+					
 				# On regarde à quel cardSlot on a cliqué
 				for i in range(CardSlots.get_child_count()):
 					var CardSlotPos = CardSlots.get_child(i).rect_position
 					var CardSlotSize = CardSlots.get_child(i).rect_size
 					var mousepos = get_global_mouse_position()
+#					print(mousepos)
+					
 					# Si on est à la position d'une cardSlot
 					if CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
 						var CardInPlay = $'../../CardInPlay'
@@ -107,11 +113,12 @@ func _input(event):
 							LastCard.setup = true
 							LastCard.CARD_SELECT = false
 							break
+							
 			############################
 			# On release
 			############################
 				# Lorsqu'on relache le click
-				if event.is_action_released("leftclick"):
+				if event is InputEventScreenTouch && !event.is_pressed():
 					if CARD_SELECT == false:
 						# Si on était une carte focus, on regarde si on va être poser sur un cardSlot
 						if oldstate == Selected :
@@ -123,7 +130,7 @@ func _input(event):
 									if mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:
 										setup = true
 										MovingtoInPlay = true
-										targetpos = CardSlotPos - $'../..'.CardSize/2
+										targetpos = CardSlotPos 
 										targetscale = CardSlotSize/rect_size
 										state = InPlay
 										CARD_SELECT = true
@@ -160,6 +167,7 @@ func _physics_process(delta):
 	match state:
 		InHand:
 			pass
+			
 		InPlay:
 			if MovingtoHand:
 				if setup:
@@ -240,6 +248,7 @@ func _physics_process(delta):
 				rect_position = targetpos
 				rect_rotation = targetrot
 				state = InHand
+				
 		ReOrganiseHand:
 			if setup:
 				Setup()
@@ -264,7 +273,8 @@ func _physics_process(delta):
 				rect_position = targetpos
 				rect_rotation = targetrot
 				rect_scale = Orig_scale
-				state = InHand		
+				state = InHand
+				
 		MoveDrawnCardToDiscard:
 			if MovingtoDiscard:
 				if setup:
@@ -336,7 +346,7 @@ func Setup():
 	t = 0
 	setup = false
 
-func _on_Focus_mouse_entered():
+#func _on_Focus_mouse_entered():
 #	printState()
 #	match state:
 #		InHand, ReOrganiseHand:
@@ -344,24 +354,25 @@ func _on_Focus_mouse_entered():
 #			targetpos = Cardpos
 #			targetpos.y = get_viewport().size.y - $'../../'.CardSize.y*ZoomInSize
 #			state = Selected
-	pass
+#	pass
 
-func _on_Focus_mouse_exited():
+#func _on_Focus_mouse_exited():
 #	match state:
 #		Selected:
 #			setup = true
 #			targetpos = Cardpos
 #			state = ReOrganiseHand
-	pass
+#	pass
 
-func _on_Focus_button_down():
-#	print("down "+Cardname+ " - old state : "+ str(state))
+
+func _on_TouchCard_pressed():
+	print("down "+Cardname+ " - old state : "+ str(state))
 	match state:
 		InHand, ReOrganiseHand:
 			state = Selected
 
-func _on_Focus_button_up():
-#	print("up "+Cardname)
+func _on_TouchCard_released():
+	print("up "+Cardname)
 	match state:
 		Selected:
 			state = ReOrganiseHand
@@ -401,3 +412,11 @@ func printState():
 #	- Voir la compatibilité téléphone et report les bugs + faire la doc d'installe pour le prof
 #	- Focus compatible sur téléphone (Placer la carte dans la partie basse de l'écran et elle apparait en immense) Puis disparait quand on sort ou relache la carte
 #	- 
+
+#
+#func _on_Victime_button_down():
+#	print("down "+Cardname+ " - old state : "+ str(state))
+#
+#
+#func _on_Victime_button_up():
+#	print("up "+Cardname)

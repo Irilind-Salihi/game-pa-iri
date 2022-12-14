@@ -14,6 +14,7 @@ func _ready():
 	scale = (TailleCard / normal.get_size())
 
 func _on_DeckDraw_pressed():
+	print("Click Deck !")
 	Decksize = $'../../'.DeckSize
 	if Decksize > 0:
 		$'../../'.drawAllCard()

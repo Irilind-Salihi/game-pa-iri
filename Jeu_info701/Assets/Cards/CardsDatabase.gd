@@ -1,7 +1,7 @@
 
 # Unitinfo = [Type, Attack, Retaliation, Health, Cost, Name, Melee or Ranged, Special Text]
 # Eventinfo = [Type, Cost, Effect]
-enum {Batiment, Evenement, Ressource, Retour, Unite, Bois, Bronze, Fer, Marbre, Or, Pierre, Mercenary, Spearman, Mentor, Trebuchet}
+enum {Batiment, Evenement, Ressource, Retour, Unite, Cabane, Mine, Bois, Bronze, Fer, Marbre, Or, Pierre, Mercenary, Spearman, Mentor, Trebuchet}
 
 const DATA = {
 	Batiment : 
@@ -14,6 +14,10 @@ const DATA = {
 		["Menu", 4, 0, 2, 3, "Retour", "Melee,\nImmune to\nRetaliation"],
 	Unite :
 		["Menu", 1, 3, 6, 3, "Unite", "Melee,\nProtector - stops the unit\nbehind it\nbeing attacked"],
+	Cabane :
+		["Batiment", 1, 3, 6, 3, "Cabane", "Melee,\nProtector - stops the unit\nbehind it\nbeing attacked"],
+	Mine :
+		["Batiment", 1, 3, 6, 3, "Mine", "Melee,\nProtector - stops the unit\nbehind it\nbeing attacked"],
 	Bois : 
 		["Ressource", 1, 1, 2, 1, "Bois", "Melee"],
 	Bronze :

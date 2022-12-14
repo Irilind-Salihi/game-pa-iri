@@ -5,7 +5,7 @@ const CardBase = preload("res://Cards/CardBase.tscn")
 const PlayerHand = preload("res://Cards/Player_Hand.gd")
 const CardSlot = preload("res://Cards/CardSlot.tscn")
 var CardSelected = []
-var currentDeck = "Menu"
+var currentDeck = "Ressource"
 var nouveauDeck = ""
 onready var DeckSize = PlayerHand.CardList[currentDeck].size()
 var CardOffset = Vector2()
@@ -18,6 +18,7 @@ var NumberCardsHand = -1
 var NumberCardsInPlay = 0
 var CardSpread = 0.25
 var OvalAngleVector = Vector2()
+var newTurn = true
 enum{
 	InHand
 	InPlay
@@ -51,39 +52,45 @@ onready var DeckPosition = $Deck/DeckDraw.position
 onready var DiscardPosition = $Discard.position
 
 func drawAllCard():
-	DeckSize = PlayerHand.CardList[currentDeck].size()
-	while (DeckSize > 0):
-#		print(DeckSize)
+#	DeckSize = PlayerHand.CardList[currentDeck].size()
+	if newTurn:
+		var listToDraw = ["Ressource","Ressource","Batiment","Batiment", "Unite", "Unite"]
+		for deckToDraw in listToDraw:
+			DeckSize = drawcard(deckToDraw)
+			var t = Timer.new()
+			t.set_wait_time(0.4)
+			t.set_one_shot(true)
+			self.add_child(t)
+			t.start()
+			yield(t, "timeout")
+			t.queue_free()
+		newTurn = false
+	else:
+		print("Termine le tour")
+			
+	
+#	for CardToConnect in $Cards.get_children():
+#		for CardNeedToConnect in $Cards.get_children():
+#			if CardToConnect != CardNeedToConnect:
+##				CardNeedToConnect.connect("selected")
+#				pass
 
-		DeckSize = drawcard()
-		var t = Timer.new()
-		t.set_wait_time(0.4)
-		t.set_one_shot(true)
-		self.add_child(t)
-		t.start()
-		yield(t, "timeout")
-		t.queue_free()
 
-
-func drawcard():
-	DeckSize = PlayerHand.CardList[currentDeck].size()
+func drawcard(deckToDraw):
+	DeckSize = PlayerHand.CardList[deckToDraw].size()
 	angle = PI/2 + CardSpread*(float(NumberCardsHand)/2 - NumberCardsHand)
 	var new_card = CardBase.instance()
 	CardSelected = randi() % DeckSize
-	new_card.Cardname = PlayerHand.CardList[currentDeck][CardSelected]
-#	print(PlayerHand.CardList)
-#	print(PlayerHand.CardList[currentDeck])
-#	print(PlayerHand.CardList[currentDeck][CardSelected])
-#	print(new_card.Cardname)
+	new_card.Cardname = PlayerHand.CardList[deckToDraw][CardSelected]
 	new_card.rect_position = DeckPosition - CardSize/2
 	new_card.DiscardPile = DiscardPosition - CardSize/2
-	new_card.DeckPile = DeckPosition - CardSize/2
+	new_card.DeckPile = DeckPosition 
 	new_card.rect_scale *= CardSize/new_card.rect_size
 	new_card.state = MoveDrawnCardToHand
 	Card_Numb = 0
 	
 	$Cards.add_child(new_card)
-	PlayerHand.CardList[currentDeck].erase(PlayerHand.CardList[currentDeck][CardSelected])
+	PlayerHand.CardList[deckToDraw].erase(PlayerHand.CardList[deckToDraw][CardSelected])
 	angle += 0.25
 	DeckSize -= 1
 	NumberCardsHand += 1
