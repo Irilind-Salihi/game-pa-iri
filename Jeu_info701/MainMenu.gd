@@ -61,11 +61,11 @@ func _on_startTouchScreen_pressed():
 
 
 func _on_statsTouchScreen_pressed():
-	pass # Replace with function body.
+	get_tree().change_scene("res://statsMenu.tscn")
 
 
 func _on_loginTouchScreen_pressed():
-	get_tree().change_scene("res://LoginMenu.tscn")
+	get_tree().change_scene("res://karmaMenu.tscn")
 
 
 
@@ -80,3 +80,7 @@ func _on_checkLogin_request_completed(result, response_code, headers, body):
 		get_node("CheckButton").pressed = false
 		print("ttest")
 		dir.remove("res://accesstoken.json")
+
+
+func _on_back_pressed():
+	get_tree().change_scene("res://my_awesome_scene.tscn")
