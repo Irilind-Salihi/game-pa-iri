@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Medieval Music – Cobblestone Village.mp3-e3641282ad7005a5361694e378bb250e.mp3str"
+
+[deps]
+
+source_file="res://Assets/Music/Medieval Music – Cobblestone Village.mp3"
+dest_files=[ "res://.import/Medieval Music – Cobblestone Village.mp3-e3641282ad7005a5361694e378bb250e.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0
