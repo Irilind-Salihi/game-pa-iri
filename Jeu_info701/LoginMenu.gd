@@ -9,17 +9,8 @@ var test = {
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	
-
 	pass
-
-
-
-func _on_loginButton_pressed():
-	var headers = ["Content-Type: application/json"]
-	var body = {username = "admin",password = "password123"}
-	body = JSON.print(body)
-	$loginContainer/loginButton/loginRequest.request("http://127.0.0.1:1234/user/login",headers, false, HTTPClient.METHOD_POST, body)
+	
 
 
 
@@ -36,12 +27,24 @@ func savefile (json):
 	file.store_string(to_json(json))
 	
 func _on_loginRequest_request_completed(result, response_code, headers, body):
-	
 	var json = JSON.parse(body.get_string_from_utf8())
 	var dict = json.result
 	var storedJson ={"access_token": dict.get("access_token"),"username": dict.get("username")}
-	print(dict.get("username"))
-	savefile(storedJson)
+
+	if(dict.get("success")):
+		print("ça existe")
+	else:
+		print("ça existe pas")
+
+	#savefile(storedJson)
 	
 	print(dict.get("access_token"))
+	#$Label.text = dict.get("access_token")
+	#get_tree().change_scene("res://MainMenu.tscn")
 
+
+func _on_connexionTouchScreen_pressed():
+	var headers = ["Content-Type: application/json"]
+	var body = {username = $usernameInput.text,password = $passwordInput.text}
+	body = JSON.print(body)
+	$connexionTouchScreen/loginRequest.request("http://51.68.226.111:1234/user/login",headers, false, HTTPClient.METHOD_POST, body)

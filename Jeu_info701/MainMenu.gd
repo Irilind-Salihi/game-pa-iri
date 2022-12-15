@@ -1,5 +1,6 @@
 extends Control
-
+var token
+var test = "test"
 
 # Declare member variables here. Examples:
 # var a = 2
@@ -10,17 +11,20 @@ func loadAccess():
 	var file = File.new()
 	if file.file_exists("res://accesstoken.json"):
 		print("y a r")
+		file.open("res://accesstoken.json", File.READ)
+		var content = file.get_as_text()
+		token = parse_json(content)
+		file.close()
+		return true
 	else:
 		print(" on a un truc roger")
-	#file.open("res://accesstoken.json", File.READ)
-	#var content = file.get_as_text()
-	file.close()
+		return false
+	
 
-
-	return "test"
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	$AudioStreamPlayer.play()
 	
 	$startTouchScreen.position.x =get_viewport().size.x * 0.13
 	$startTouchScreen.position.y =get_viewport().size.y * 0.25
@@ -34,15 +38,16 @@ func _ready():
 	$loginTouchScreen.position.y =get_viewport().size.y * 0.75
 	$loginTouchScreen.scale = Vector2(500,100) / $loginTouchScreen.normal.get_size()
 	
+	if(loadAccess()):
+		var headers = ["Content-Type: application/json","Authorization: Bearer "+token["access_token"]]
+		var body = {}
+		body = JSON.print(body)
+		$checkLogin.request("http://51.68.226.111:1234/user/check",headers, false, HTTPClient.METHOD_POST, body)
+		
 	
 	
-	loadAccess()
 
-	var headers = ["Content-Type: application/json","Authorization: Bearer "+"token"]
-	var body = {username = "admin"}
-	body = JSON.print(body)
-
-	$checkLogin.request("http://127.0.0.1:1234/user/check",headers, false, HTTPClient.METHOD_POST, body)
+	
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -62,3 +67,16 @@ func _on_statsTouchScreen_pressed():
 func _on_loginTouchScreen_pressed():
 	get_tree().change_scene("res://LoginMenu.tscn")
 
+
+
+func _on_checkLogin_request_completed(result, response_code, headers, body):
+	var dir = Directory.new()
+	var json = JSON.parse(body.get_string_from_utf8())
+	var dict = json.result
+	print(dict)
+	if dict.get("success"):
+		get_node("CheckButton").pressed = true
+	else:
+		get_node("CheckButton").pressed = false
+		print("ttest")
+		dir.remove("res://accesstoken.json")
