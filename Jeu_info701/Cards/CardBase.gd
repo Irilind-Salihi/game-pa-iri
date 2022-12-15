@@ -227,20 +227,24 @@ func _physics_process(delta):
 			if MovingtoDiscard:
 				if setup:
 					Setup()
-					var randomPosX = (randi() % 25) - 12
-					var randomPosY = (randi() % 10) - 5
+					var xView = get_viewport().size.x * 0.01
+					var yView = get_viewport().size.y * 0.01
+					var randomPosX = (randi() % int(xView*2)) - xView
+					var randomPosY = (randi() % int(yView*2)) - yView
 
 					targetpos.x = DiscardPile.x + randomPosX
 					targetpos.y = DiscardPile.y + randomPosY
 					
-					var randomAngle = (randf()*30) - 15
-					targetrot = startrot * (randomAngle*1.0)
+					var randomAngle = (randf()*30.0) - 15.0
+					targetrot = (randomAngle*1.0)
 				if t <= 1: # Always be a 1
 					rect_position = startpos.linear_interpolate(targetpos, t)
+					rect_rotation = startrot * (1-t) + targetrot*t
 					rect_scale = startscale * (1-t) + Orig_scale*t
 					t += delta/float(DRAWTIME)
 				else:
 					rect_position = targetpos
+					rect_rotation = targetrot
 					rect_scale = Orig_scale
 					MovingtoDiscard = false
 					state = Discard
