@@ -1,5 +1,8 @@
 extends Node2D
 
+var nbTurn = 0
+var Karma = 0 
+
 var CardSize = Vector2(125,175)
 const CardBase = preload("res://Cards/CardBase.tscn")
 const PlayerHand = preload("res://Cards/Player_Hand.gd")
@@ -46,11 +49,17 @@ func _ready():
 	CardSlotEmpty.append(true)
 	$Background.position = Vector2(0,0)
 	$Background.scale = get_viewport().size/$Background.texture.get_size()
-	pass
+	$Karma.position = get_viewport().size * Vector2(0.05,0.05)
+	updateKarma(0)
+	
+func updateKarma(modif):
+	Karma += modif
+	$Karma/Align/NbKarma.text = str(Karma)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
+
 onready var DeckPosition = $Deck/DeckDraw.position
 onready var DiscardPosition = $Discard/DiscardPile.rect_position
 var inAnimation = false
@@ -111,6 +120,7 @@ func drawAllCard():
 			NumberCardsHand = -1
 			NumberCardsInPlay = 0
 			inAnimation = false
+			nbTurn += 1
 			newTurn = true
 			
 
