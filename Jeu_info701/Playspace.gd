@@ -9,14 +9,14 @@ var currentDeck = "Ressource"
 var nouveauDeck = ""
 onready var DeckSize = PlayerHand.CardList[currentDeck].size()
 var CardOffset = Vector2()
-onready var CentreCardOval = get_viewport().size * Vector2(0.5, 1.25)
+onready var CentreCardOval = get_viewport().size * Vector2(0.5, 1.0) + CardSize/2
 onready var Hor_rad = get_viewport().size.x*0.5
 onready var Ver_rad = get_viewport().size.y*0.4
 var angle = 0
 var Card_Numb = 0
 var NumberCardsHand = -1
 var NumberCardsInPlay = 0
-var CardSpread = 0.25
+var CardSpread = 0.30
 var OvalAngleVector = Vector2()
 var newTurn = true
 
@@ -41,7 +41,7 @@ func _ready():
 	randomize()
 	var NewSlot = CardSlot.instance()
 	NewSlot.rect_size = CardSize
-	NewSlot.rect_position = get_viewport().size * 0.5 - CardSize/2
+	NewSlot.rect_position = get_viewport().size * Vector2(0.5,0.4) - CardSize/2
 	$CardSlots.add_child(NewSlot)
 	CardSlotEmpty.append(true)
 	$Background.position = Vector2(0,0)
