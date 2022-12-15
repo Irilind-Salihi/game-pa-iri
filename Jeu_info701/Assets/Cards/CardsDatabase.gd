@@ -1,41 +1,45 @@
 
 # Unitinfo = [Type, Attack, Retaliation, Health, Cost, Name, Melee or Ranged, Special Text]
 # Eventinfo = [Type, Cost, Effect]
-enum {Batiment, Evenement, Ressource, Retour, Unite, Cabane, Mine, Bois, Bronze, Fer, Marbre, Or, Pierre, Mercenary, Spearman, Mentor, Trebuchet}
+enum {Batiment, Evenement, Ressource, Retour, Unite, Cabane, Mine, Banque, Caserne, Bois, Bronze, Fer, Marbre, Or, Pierre, Mercenary, Spearman, Mentor, Trebuchet}
 
 const DATA = {
 	Batiment : 
-		["Menu", 1, 1, 2, 1, "Batiment", "Melee"],
+		["Menu", "Batiment", -1, " "],
 	Evenement :
-		["Menu", 2, 1, 3, 2, "Evenement", "Ranged,\nImmune to\nRetaliation"],
+		["Menu", "Evenement", -1, " "],
 	Ressource :
-		["Menu", 2, 2, 3, 3, "Ressource", "Melee,\nGive all friendly\n+1 Attack and \nRetaliation"],
+		["Menu", "Ressource", -1, " "],
 	Retour :
-		["Menu", 4, 0, 2, 3, "Retour", "Melee,\nImmune to\nRetaliation"],
+		["Menu", "Retour", -1, " "],
 	Unite :
-		["Menu", 1, 3, 6, 3, "Unite", "Melee,\nProtector - stops the unit\nbehind it\nbeing attacked"],
+		["Menu", "Unite", -1, " "],
 	Cabane :
-		["Batiment", 1, 3, 6, 3, "Cabane", "Melee,\nProtector - stops the unit\nbehind it\nbeing attacked"],
+		["Batiment", "Cabane", 1, "Prix : "],
 	Mine :
-		["Batiment", 1, 3, 6, 3, "Mine", "Melee,\nProtector - stops the unit\nbehind it\nbeing attacked"],
+		["Batiment", "Mine", 1, "Prix : "],
+	Banque :
+		["Batiment", "Banque", 1, "Prix : "],
+	Caserne :
+		["Batiment", "Caserne", 1, "Prix : "],
 	Bois : 
-		["Ressource", 1, 1, 2, 1, "Bois", "Melee"],
+		["Ressource", "Bois", 20, " "],
 	Bronze :
-		["Ressource", 2, 1, 3, 2, "Bronze", "Ranged,\nImmune to\nRetaliation"],
+		["Ressource", "Bronze", 20, " "],
 	Fer :
-		["Ressource", 2, 2, 3, 3, "Fer", "Melee,\nGive all friendly\n+1 Attack and \nRetaliation"],
+		["Ressource", "Fer", 20, " "],
 	Marbre :
-		["Ressource", 4, 0, 2, 3, "Marbre", "Melee,\nImmune to\nRetaliation"],
+		["Ressource", "Marbre", 20, " "],
 	Or :
-		["Ressource", 1, 3, 6, 3, "Or", "Melee,\nProtector - stops the unit\nbehind it\nbeing attacked"],
+		["Ressource", "Or", 20, " "],
 	Pierre : 
-		["Ressource", 2, 3, 6, 4, "Pierre", "Melee"],
+		["Ressource", "Pierre", 20, " "],
 	Mercenary :
-		["Unite", 2, 2, 0, 2, "Mercenary", "Melee,\nAlways Retaliates\nReturn to Supply when damaged\nor at start of next turn\nAfter played, increase\ncost by 1"],
+		["Unite", "Mercenary", -1, " "],
 	Spearman :
-		["Unite", 2, 2, 5, 3, "Spearman", "Melee or Ranged"],
+		["Unite", "Spearman", -1, " "],
 	Mentor :
-		["Unite", 3, 0, 1, 2, "Mentor", "Melee,\nWhen played give\nfriendly unit +2 Attack\nand Retaliation"],
+		["Unite", "Mentor", -1, " "],
 	Trebuchet :
-		["Evenement", 4, "Deal 6 damage\nto a unit"],
+		["Evenement", "Trebuchet", -1, "Event : "],
 	}
