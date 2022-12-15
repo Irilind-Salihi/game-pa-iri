@@ -41,17 +41,12 @@ func _ready():
 	$CardBack.scale *= CardSize/$CardBack.texture.get_size()
 	$TouchCard.scale *= CardSize/($TouchCard.normal.get_size())
 	
-	var Attack = str(CardInfo[1])
-	var Retaliation = str(CardInfo[2])
-	var Health = str(CardInfo[3])
-	var Cost = str(CardInfo[4])
-	var Name = str(CardInfo[5])
-	var SpecialText = str(CardInfo[6])
+	var Cost = str(CardInfo[2])
+	var Name = str(CardInfo[1])
+	var SpecialText = str(CardInfo[3])
 	$Bars/TopBar/Name/CenterContainer/Name.text = Name
 	$Bars/TopBar/Cost/CenterContainer/Cost.text = Cost
 	$Bars/SpecialText/Text/CenterContainer/Type.text = SpecialText
-	$Bars/BottomBar/Health/CenterContainer/Health.text = Health
-	$Bars/BottomBar/Attack/CenterContainer/AandR.text = str(Attack,'/',Retaliation)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 var setup = true
