@@ -3,9 +3,9 @@ extends MarginContainer
 signal selected
 
 # Declare member variables here. Examples:
-onready var CardDatabase = preload("res://Assets/Cards/CardsDatabase.gd")
+onready var CardDatabase = get_node("/root/CardsDatabase")
 var Cardname = 'Bois'
-onready var CardInfo = CardDatabase.DATA[CardDatabase.get(Cardname)]
+onready var CardInfo = CardDatabase.DATA[Cardname]
 onready var CardImg = str("res://Assets/Cards/",CardInfo[0],"/",Cardname,".png")
 var startpos = Vector2()
 var targetpos = Vector2()
@@ -44,9 +44,37 @@ func _ready():
 	var Cost = str(CardInfo[2])
 	var Name = str(CardInfo[1])
 	var SpecialText = str(CardInfo[3])
+	if CardInfo[0] == "Batiment":
+		for i in CardInfo[5]:
+			var Y = CardDatabase.DATA[i][2]
+			var X = CardInfo[2]
+			var amountToLevelUp = Y*X
+			SpecialText = SpecialText + " " + str(i) + " : " + str(amountToLevelUp-CardInfo[4][CardInfo[5].find(i)])
+		
 	$Bars/TopBar/Name/CenterContainer/Name.text = Name
-	$Bars/TopBar/Cost/CenterContainer/Cost.text = Cost
-	$Bars/SpecialText/Text/CenterContainer/Type.text = SpecialText
+	
+	if Cost != "-1":
+		setCost(Cost)
+	if SpecialText != " ":
+		setSpecialText(SpecialText)
+		
+func setCost(modif):
+	$Bars/TopBar/Cost/CenterContainer/Cost.text = str(modif)
+
+func updateSpecialText():
+	var SpecialText = str(CardInfo[3])
+	if CardInfo[0] == "Batiment":
+		for i in CardInfo[5]:
+			var Y = CardDatabase.DATA[i][2]
+			var X = CardInfo[2]
+			var amountToLevelUp = Y*(Y/2)*X
+			print(amountToLevelUp-CardInfo[4][CardInfo[5].find(i)])
+			SpecialText = SpecialText + " " + str(i) + " : " + str(amountToLevelUp-CardInfo[4][CardInfo[5].find(i)])
+		
+	$Bars/SpecialText/Text/CenterContainer/Type.text = str(SpecialText)
+
+func setSpecialText(modif):
+	$Bars/SpecialText/Text/CenterContainer/Type.text = str(modif)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 var setup = true

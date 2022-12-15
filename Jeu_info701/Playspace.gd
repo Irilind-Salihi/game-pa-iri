@@ -7,6 +7,7 @@ var CardSize = Vector2(125,175)
 const CardBase = preload("res://Cards/CardBase.tscn")
 const PlayerHand = preload("res://Cards/Player_Hand.gd")
 const CardSlot = preload("res://Cards/CardSlot.tscn")
+onready var CardDatabase = get_node("/root/CardsDatabase")
 var CardSelected = []
 var currentDeck = "Ressource"
 var nouveauDeck = ""
@@ -67,7 +68,7 @@ var inAnimation = false
 func drawAllCard():
 	if !inAnimation:
 		if newTurn:
-			print(angle)
+#			print(angle)
 			inAnimation = true
 			var listToDraw = [["Ressource",1],["Ressource",1],["Ressource",1],["Batiment",1],["Batiment",1],["Unite",1]]
 			var selectedList = []
@@ -208,7 +209,7 @@ func drop(Card):
 
 func cardSelected(Card, grabbed):
 	if grabbed:
-		print(Card.Card_Numb)
+#		print(Card.Card_Numb)
 		if !alreadyGrab:
 			print("Grab")
 			alreadyGrab = true
@@ -216,7 +217,7 @@ func cardSelected(Card, grabbed):
 			drag(Card)
 		else:
 			if Card.state != InPlay && cardAlreadyGrab.state != InPlay:
-				print(cardAlreadyGrab.Card_Numb)
+#				print(cardAlreadyGrab.Card_Numb)
 				if Card.Card_Numb > cardAlreadyGrab.Card_Numb:
 					drop(cardAlreadyGrab)
 					drag(Card)
@@ -226,8 +227,8 @@ func cardSelected(Card, grabbed):
 		drop(Card)
 		alreadyGrab = false
 		cardAlreadyGrab = null
-		print(alreadyGrab)
-		print(cardAlreadyGrab)
+#		print(alreadyGrab)
+#		print(cardAlreadyGrab)
 			
 
 func ReParentCardInPlay(CardNo):
@@ -243,7 +244,7 @@ func ReParentCardInPlay(CardNo):
 #	print($CardInPlay.get_children())
 	OrganiseHand()
 	Rule()
-	print(NumberCardsInPlay)
+#	print(NumberCardsInPlay)
 
 func ReParentCardInHand():
 	print("Reparent in hand")
@@ -291,7 +292,22 @@ func Rule():
 		pos += 1
 		match Card.CardInfo[0]:
 			"Batiment":
-				pass
+				print(allCard[0].CardInfo[4][allCard[0].CardInfo[5].find(allCard[0].Cardname)])
+				if pos == 1 && allCard.size() > 1:
+					if allCard[pos].CardInfo[0] == "Ressource":
+						var res = checkUpgrade(allCard[pos-1],allCard[pos])
+						if res[0]:
+							if res[1]:
+								levelUp(allCard[pos-1])
+							var allCardInPlay = $CardInPlay.get_children().back()
+							allCardInPlay.deffausseCard()
+							$CardInPlay.remove_child(allCardInPlay)
+							$CardsInDiscard.add_child(allCardInPlay)	
+							NumberCardsInPlay -=1							
+						else:
+							ReParentCardInHand()
+					else:
+						ReParentCardInHand()
 			"Unite":
 				if pos == 1:
 					ReParentCardInHand()
@@ -308,7 +324,48 @@ func Rule():
 				pass
 			_:
 				noRule()
-						
+
+func checkUpgrade(batiment,ressource):
+	if batiment.CardInfo[5].has(ressource.Cardname):
+		batiment.CardInfo[4][batiment.CardInfo[5].find(ressource.Cardname)] += ressource.CardInfo[2]
+		print(batiment.CardInfo[4][batiment.CardInfo[5].find(ressource.Cardname)])
+		var canLevelUp = true
+		for neededRes in batiment.CardInfo[5]:
+			var Y = batiment.CardDatabase.DATA[neededRes][2]
+			var X = batiment.CardInfo[2]
+			var amountToLevelUp = Y*Y*X
+			if amountToLevelUp  < batiment.CardInfo[4][batiment.CardInfo[5].find(neededRes)]:
+				canLevelUp = false
+		return [true, canLevelUp]
+	else:
+		return [false, false]
+
+func levelUp(Batiment):
+	match Batiment.CardInfo[1]:
+		"Cabane":
+			Batiment.CardInfo[2] += 1
+			Batiment.setCost(Batiment.CardInfo[2])
+			CardDatabase.DATA["Cabane"][2] = Batiment.CardInfo[2]
+			Batiment.updateSpecialText()
+			CardDatabase.DATA["Bois"][2] = int((round(float((CardDatabase.DATA["Bois"][2]*CardDatabase.DATA["Bois"][2]*Batiment.CardInfo[2])/5)))*5)
+		"Mine":
+			Batiment.CardInfo[2] += 1
+			Batiment.setCost(Batiment.CardInfo[2])
+			CardDatabase.DATA["Mine"][2] = Batiment.CardInfo[2]
+			Batiment.updateSpecialText()
+			CardDatabase.DATA["Fer"][2] = int((round(float((CardDatabase.DATA["Fer"][2]*CardDatabase.DATA["Fer"][2]*Batiment.CardInfo[2])/5)))*5)
+		"Banque":
+			Batiment.CardInfo[2] += 1
+			Batiment.setCost(Batiment.CardInfo[2])
+			CardDatabase.DATA["Banque"][2] = Batiment.CardInfo[2]
+			Batiment.updateSpecialText()
+			CardDatabase.DATA["Or"][2] = int((round(float((CardDatabase.DATA["Or"][2]*CardDatabase.DATA["Or"][2]*Batiment.CardInfo[2])/5)))*5)
+		"Caserne":
+			Batiment.CardInfo[2] += 1
+			Batiment.setCost(Batiment.CardInfo[2])
+			Batiment.updateSpecialText()
+			Karma += 10
+			updateKarma(10)
 #func changementMenuToSousMenu(newDeck):
 #	print("Change de Deck")
 #	var GetTimeCard = CardBase.instance()
