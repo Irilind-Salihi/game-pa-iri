@@ -1,10 +1,10 @@
 const CardList = {
 	"Batiment":
-		["Cabane", "Mine", "Cabane", "Mine"],
+		["Cabane", "Mine", "Banque", "Caserne"],
 	"Ressource":
-		["Bois", "Bois", "Bronze", "Fer", "Pierre"],
+		["Bois", "Fer", "Or"],
 	"Evenement":
 		["Trebuchet", "Trebuchet"],
 	"Unite":
-		["Spearman", "Mentor", "Mercenary"]
+		["Mentor", "Mercenary"]
 }

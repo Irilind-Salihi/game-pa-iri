@@ -51,6 +51,7 @@ func _ready():
 	$Background.scale = get_viewport().size/$Background.texture.get_size()
 	$Karma.position = get_viewport().size * Vector2(0.05,0.05)
 	updateKarma(0)
+	drawAllCard()
 	
 func updateKarma(modif):
 	Karma += modif
@@ -68,9 +69,10 @@ func drawAllCard():
 		if newTurn:
 			print(angle)
 			inAnimation = true
-			var listToDraw = ["Ressource","Batiment", "Unite"]
+			var listToDraw = [["Ressource",1],["Ressource",1],["Ressource",1],["Batiment",1],["Batiment",1],["Unite",1]]
+			var selectedList = []
 			for deckToDraw in listToDraw:
-				DeckSize = drawcard(deckToDraw,1)
+				selectedList.append_array(drawcard(deckToDraw[0],deckToDraw[1]))
 				var t = Timer.new()
 				t.set_wait_time(0.4)
 				t.set_one_shot(true)
@@ -78,14 +80,8 @@ func drawAllCard():
 				t.start()
 				yield(t, "timeout")
 				t.queue_free()
-				DeckSize = drawcard(deckToDraw,1)
-				var t2 = Timer.new()
-				t2.set_wait_time(0.4)
-				t2.set_one_shot(true)
-				self.add_child(t2)
-				t2.start()
-				yield(t2, "timeout")
-				t2.queue_free()
+			for cardPicked in selectedList:
+				PlayerHand.CardList[cardPicked[0]].append(cardPicked[1])
 			newTurn = false
 			inAnimation = false
 		else:
@@ -122,6 +118,7 @@ func drawAllCard():
 			inAnimation = false
 			nbTurn += 1
 			newTurn = true
+			drawAllCard()
 			
 
 func drawcard(deckToDraw,nb):
@@ -132,7 +129,7 @@ func drawcard(deckToDraw,nb):
 		var new_card = CardBase.instance()
 		CardSelected = randi() % DeckSize
 		new_card.Cardname = PlayerHand.CardList[deckToDraw][CardSelected]
-		selectedList.append(PlayerHand.CardList[deckToDraw][CardSelected])
+		selectedList.append([deckToDraw,new_card.Cardname])
 		new_card.rect_position = DeckPosition
 		new_card.DiscardPile = DiscardPosition
 		new_card.DeckPile = DeckPosition 
@@ -148,11 +145,7 @@ func drawcard(deckToDraw,nb):
 		NumberCardsHand += 1
 		OrganiseHand()
 		
-	for cardPicked in selectedList:
-		PlayerHand.CardList[deckToDraw].append(cardPicked)
-	DeckSize = PlayerHand.CardList[deckToDraw].size()
-		
-	return DeckSize
+	return selectedList
 
 var alreadyGrab = false
 var cardAlreadyGrab = null
@@ -292,106 +285,82 @@ func OrganiseHand():
 			Card.startpos = Card.targetpos - ((Card.targetpos - Card.rect_position)/(1-Card.t))
 
 func Rule():
+	var pos = 0
 	var allCard = $CardInPlay.get_children();
 	for Card in allCard:
-		match currentDeck:
-			"Menu":
-				match Card.Cardname:
-					"Batiment":
-						changementMenuToSousMenu("Batiment")
-						break
-					"Evenement":
-						changementMenuToSousMenu("Evenement")
-						break
-					"Ressource":
-						changementMenuToSousMenu("Ressource")
-						break
-					"Unite":
-						changementMenuToSousMenu("Unite")
-						break
+		pos += 1
+		match Card.CardInfo[0]:
 			"Batiment":
-				match Card.Cardname:
-					"Retour":
-						changementMenuToSousMenu("Menu")
-						break
-					_:
-						noRule()
+				pass
 			"Unite":
-				match Card.Cardname:
-					"Retour":
-						changementMenuToSousMenu("Menu")
-						break
-					_:
-						noRule()
-			"Evenement":
-				match Card.Cardname:
-					"Retour":
-						changementMenuToSousMenu("Menu")
-						break
-					_:
-						noRule()
+				if pos == 1:
+					ReParentCardInHand()
+					break
+				else:
+					pass
 			"Ressource":
-				match Card.Cardname:
-					"Retour":
-						changementMenuToSousMenu("Menu")
-						break
-					_:
-						noRule()
+				if pos == 1:
+					ReParentCardInHand()
+					break
+				else:
+					pass
+			"Evenement":
+				pass
 			_:
 				noRule()
 						
-func changementMenuToSousMenu(newDeck):
-	print("Change de Deck")
-	var GetTimeCard = CardBase.instance()
-	var WAITINGTIME = GetTimeCard.DRAWTIME * (NumberCardsHand+1)*2
-	print(WAITINGTIME)
-	
-	var list = $Cards.get_children()
-	for DiscCard in $Cards.get_children():
-		$Cards.remove_child(DiscCard)
-		$CardsInDiscard.add_child(DiscCard)
-	
-	for e in range(list.size()):
-		var CardInHand = list.pop_front()
-		PlayerHand.CardList[currentDeck].append(CardInHand.Cardname)
-		CardInHand.deffausseCard()
-		var t = Timer.new()
-		t.set_wait_time(GetTimeCard.DRAWTIME/(NumberCardsHand*1.0))
-		t.set_one_shot(true)
-		self.add_child(t)
-		t.start()
-		yield(t, "timeout")
-		t.queue_free()
-	
-	var Card = $CardInPlay.get_children().back()
-	$CardInPlay.remove_child(Card)
-	$CardsInDiscard.add_child(Card)
-	PlayerHand.CardList[currentDeck].append(Card.Cardname)
-	NumberCardsInPlay -= 1
-	NumberCardsHand += 1
-	Card.deffausseCard()
+#func changementMenuToSousMenu(newDeck):
+#	print("Change de Deck")
+#	var GetTimeCard = CardBase.instance()
+#	var WAITINGTIME = GetTimeCard.DRAWTIME * (NumberCardsHand+1)*2
+#	print(WAITINGTIME)
+#
+#	var list = $Cards.get_children()
+#	for DiscCard in $Cards.get_children():
+#		$Cards.remove_child(DiscCard)
+#		$CardsInDiscard.add_child(DiscCard)
+#
+#	for e in range(list.size()):
+#		var CardInHand = list.pop_front()
+#		PlayerHand.CardList[currentDeck].append(CardInHand.Cardname)
+#		CardInHand.deffausseCard()
+#		var t = Timer.new()
+#		t.set_wait_time(GetTimeCard.DRAWTIME/(NumberCardsHand*1.0))
+#		t.set_one_shot(true)
+#		self.add_child(t)
+#		t.start()
+#		yield(t, "timeout")
+#		t.queue_free()
+#
+#	var Card = $CardInPlay.get_children().back()
+#	$CardInPlay.remove_child(Card)
+#	$CardsInDiscard.add_child(Card)
+#	PlayerHand.CardList[currentDeck].append(Card.Cardname)
+#	NumberCardsInPlay -= 1
+#	NumberCardsHand += 1
+#	Card.deffausseCard()
 
 		
 #	print($CardsInDiscard.get_children())
-	
-	nouveauDeck = newDeck
-	print("Lancement du minuteur.")
-	
-	var t = Timer.new()
-	t.set_wait_time(GetTimeCard.DRAWTIME)
-	t.set_one_shot(true)
-	self.add_child(t)
-	t.start()
-	yield(t, "timeout")
-	t.queue_free()
-	
-	GetTimeCard.queue_free()
-	
-	Card_Numb = 0
-	NumberCardsHand = -1
-	DeckSize = 0
-	currentDeck = nouveauDeck
-	drawAllCard()
+#
+#	nouveauDeck = newDeck
+#	print("Lancement du minuteur.")
+#
+#	var t = Timer.new()
+#	t.set_wait_time(GetTimeCard.DRAWTIME)
+#	t.set_one_shot(true)
+#	self.add_child(t)
+#	t.start()
+#	yield(t, "timeout")
+#	t.queue_free()
+#
+#	GetTimeCard.queue_free()
+#
+#	Card_Numb = 0
+#	NumberCardsHand = -1
+#	DeckSize = 0
+#	currentDeck = nouveauDeck
+#	drawAllCard()
 
 func noRule():
 	print("No Rule")
