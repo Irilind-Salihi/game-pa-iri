@@ -82,7 +82,9 @@ func drawAllCard():
 		else:
 			print("Termine le tour")
 			inAnimation = true
-			for allCardInPlay in $CardInPlay.get_children():
+			
+			for i in range($CardInPlay.get_children().size()):
+				var allCardInPlay = $CardInPlay.get_children().back()
 				allCardInPlay.deffausseCard()
 				$CardInPlay.remove_child(allCardInPlay)
 				$CardsInDiscard.add_child(allCardInPlay)
@@ -93,7 +95,8 @@ func drawAllCard():
 				t.start()
 				yield(t, "timeout")
 				t.queue_free()
-			for allCardInHand in $Cards.get_children():
+			for i in range($Cards.get_children().size()):
+				var allCardInHand = $Cards.get_children().back()
 				allCardInHand.deffausseCard()
 				$Cards.remove_child(allCardInHand)
 				$CardsInDiscard.add_child(allCardInHand)
