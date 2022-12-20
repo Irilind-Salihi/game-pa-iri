@@ -14,6 +14,10 @@ const PlayerHand = preload("res://Cards/Player_Hand.gd")
 const CardSlot = preload("res://Cards/CardSlot.tscn")
 onready var CardDatabase = get_node("/root/CardsDatabase")
 
+# Variable de la position de node de la scène
+onready var DeckPosition = $Deck/DeckDraw.position
+onready var DiscardPosition = $Discard/DiscardPile.rect_position
+
 # Variables utilisés pour la pioche de carte
 var CardSelected = []
 var newTurn = true
@@ -38,6 +42,13 @@ var OvalAngleVector = Vector2()
 # Variable des endroits déposables de la carte
 var CardSlotEmpty = []
 
+# Variable pour l'animation de la carte
+var inAnimation = false
+
+# Variable pour le drag and drop
+var alreadyGrab = false
+var cardAlreadyGrab = null
+
 # Variable des différents états de la carte
 enum{
 	InHand
@@ -57,29 +68,40 @@ func _enter_tree():
 
 # Fonction appelée lorsque le noeud à fini de s'initialiser
 func _ready():
+	# Change la seed de la génération aléatoire avec un nombre basé sur le temps
 	randomize()
+
+	# Création de l'emplacement pour poser la carte
+	# Ainsi que le réglage de sa dimension pour correspondre au carte, son placement sur la scène
+	# Et son ajout au noeud (le noeud = la liste des emplacements de carte).
 	var NewSlot = CardSlot.instance()
 	NewSlot.rect_size = CardSize
 	NewSlot.rect_position = get_viewport().size * Vector2(0.5,0.4) - CardSize/2
 	$CardSlots.add_child(NewSlot)
+
+	# On ajoute dans la liste 
 	CardSlotEmpty.append(true)
+
+	# On ajoute le background de la scène et on le redimensionne pour qu'il prenne toute la scène
 	$Background.position = Vector2(0,0)
 	$Background.scale = get_viewport().size/$Background.texture.get_size()
+
+	# On positionne l'élément d'affichage du Karma sur la scène
 	$Karma.position = get_viewport().size * Vector2(0.05,0.05)
 	updateKarma(0)
+
+	# On appelle la fonction pour piocher les cartes de la main
 	drawAllCard()
-	
+
+# Fonction qui met à jour la variable de karma ainsi que l'affichage
 func updateKarma(modif):
 	Karma += modif
 	$Karma/Align/NbKarma.text = str(Karma)
 
-onready var DeckPosition = $Deck/DeckDraw.position
-onready var DiscardPosition = $Discard/DiscardPile.rect_position
-var inAnimation = false
+# Fonction pour piocher toutes les cartes du deck si le tour est déjà lancer déchausse toutes les cartes puis en repioche de nouvelles
 func drawAllCard():
 	if !inAnimation:
 		if newTurn:
-#			print(angle)
 			inAnimation = true
 			var listToDraw = [["Ressource",1],["Ressource",1],["Ressource",1],["Batiment",1],["Batiment",1],["Unite",1]]
 			var selectedList = []
@@ -132,7 +154,7 @@ func drawAllCard():
 			newTurn = true
 			drawAllCard()
 			
-
+# Fonction pour piocher une carte
 func drawcard(deckToDraw,nb):
 	var selectedList = []
 	for i in range(nb):
@@ -159,9 +181,7 @@ func drawcard(deckToDraw,nb):
 		
 	return selectedList
 
-var alreadyGrab = false
-var cardAlreadyGrab = null
-
+# Fonction pour prendre une carte
 func drag(Card):
 	if Card.CARD_SELECT && Card.state != InPlay:
 		print("Dans la main")
@@ -175,7 +195,6 @@ func drag(Card):
 		var CardSlotPos = $CardSlots.get_child(i).rect_position
 		var CardSlotSize = $CardSlots.get_child(i).rect_size
 		var mousepos = get_global_mouse_position()
-#					print(mousepos)
 		# Si on est à la position d'une cardSlot
 		if Card.CARD_SELECT && mousepos.x > CardSlotPos.x && mousepos.x < CardSlotPos.x + CardSlotSize.x && mousepos.y > CardSlotPos.y && mousepos.y < CardSlotPos.y + CardSlotSize.y:			
 			# On prend la dernière carte (celle du dessus)
@@ -188,6 +207,7 @@ func drag(Card):
 				LastCard.CARD_SELECT = false
 				break
 
+# Fonction pour lâcher la carte
 func drop(Card):
 	if Card.CARD_SELECT == false:
 		# Si on était une carte focus, on regarde si on va être poser sur un cardSlot
@@ -218,9 +238,9 @@ func drop(Card):
 			Card.CARD_SELECT = true
 			ReParentCardInHand()
 
+# Fonction appellé par le signal de la carte quand elle est prise et relacher
 func cardSelected(Card, grabbed):
 	if grabbed:
-#		print(Card.Card_Numb)
 		if !alreadyGrab:
 			print("Grab")
 			alreadyGrab = true
@@ -228,7 +248,6 @@ func cardSelected(Card, grabbed):
 			drag(Card)
 		else:
 			if Card.state != InPlay && cardAlreadyGrab.state != InPlay:
-#				print(cardAlreadyGrab.Card_Numb)
 				if Card.Card_Numb > cardAlreadyGrab.Card_Numb:
 					drop(cardAlreadyGrab)
 					drag(Card)
@@ -238,33 +257,26 @@ func cardSelected(Card, grabbed):
 		drop(Card)
 		alreadyGrab = false
 		cardAlreadyGrab = null
-#		print(alreadyGrab)
-#		print(cardAlreadyGrab)
-			
 
+# Fonction qui prend le numéro de la carte et change le parent :
+# InHand (la main) -> InPlay (Dans le slot au milieu de l'écran)
+# Fait l'inverse de ReParentInHand
 func ReParentCardInPlay(CardNo):
-	print("Reparent in play")
 	NumberCardsHand -= 1
 	NumberCardsInPlay += 1
 	Card_Numb = 0
 	var Card = $Cards.get_child(CardNo)
 	$Cards.remove_child(Card)
 	$CardInPlay.add_child(Card)
-#	print("Ajout")
-#	print($Cards.get_children())
-#	print($CardInPlay.get_children())
 	OrganiseHand()
 	Rule()
-#	print(NumberCardsInPlay)
 
+# Fonction qui prend la dernière carte (celle du dessus) et change le parent :
+# InPlay (Dans le slot au milieu de l'écran) -> InHand (la main)
+# Fait l'inverse de ReParentCardInPlay
 func ReParentCardInHand():
-	print("Reparent in hand")
-#	print(NumberCardsInPlay)
 	NumberCardsInPlay -= 1
 	var Card = $CardInPlay.get_child(NumberCardsInPlay)
-#	print("Card deck : ",Card.CardInfo[0])
-#	print("Current deck : ",currentDeck)
-#	if (Card.CardInfo[0] == currentDeck):
 	NumberCardsHand += 1
 	Card_Numb = 0
 	Card.setup = true
@@ -272,20 +284,16 @@ func ReParentCardInHand():
 	$CardInPlay.remove_child(Card)
 	$Cards.add_child(Card)
 	OrganiseHand()
-#	else:
-#		PlayerHand.CardList[Card.CardInfo[0]].append(Card.Cardname)
-#		Card.setup = true
-#		Card.MovingtoDeck = true
-#		Card.state = MoveDrawnCardToDeck
-#
 
+# Fonction qui réorganise et replace correctement toutes les cartes de la main
+# Elle gère aussi le positionnement et l'inclinaison (par rapport au ovale)
 func OrganiseHand():
-	for Card in $Cards.get_children(): # reorganise hand
+	for Card in $Cards.get_children():
 		angle = PI/2 + CardSpread*(float(NumberCardsHand)/2 - Card_Numb)
 		OvalAngleVector = Vector2(Hor_rad * cos(angle), - Ver_rad * sin(angle))
 		
 		Card.targetpos = CentreCardOval + OvalAngleVector - CardSize
-		Card.Cardpos = Card.targetpos # card default pos
+		Card.Cardpos = Card.targetpos 
 		Card.startrot = Card.rect_rotation
 		Card.targetrot = (90 - rad2deg(angle))/4
 		Card.Card_Numb = Card_Numb
@@ -296,6 +304,12 @@ func OrganiseHand():
 		elif Card.state == MoveDrawnCardToHand:
 			Card.startpos = Card.targetpos - ((Card.targetpos - Card.rect_position)/(1-Card.t))
 
+# Fonction appelé à chaque fois que l'on pose une carte dans InPlay
+# Elle sert à choisir quelles seront les comportement des chaques cartes :
+#  - Lorsqu'elles sont posé
+#  - Si elles ont le droit d'être posé
+#  - Sur quoi elles sont posé 
+#  - Etc ...
 func Rule():
 	var pos = 0
 	var allCard = $CardInPlay.get_children();
@@ -336,6 +350,7 @@ func Rule():
 			_:
 				noRule()
 
+# Fonction qui vérifie si une amélioration de batiment est possible
 func checkUpgrade(batiment,ressource):
 	if batiment.CardInfo[5].has(ressource.Cardname):
 		batiment.CardInfo[4][batiment.CardInfo[5].find(ressource.Cardname)] += ressource.CardInfo[2]
@@ -351,6 +366,8 @@ func checkUpgrade(batiment,ressource):
 	else:
 		return [false, false]
 
+# Fonction qui augmente le niveau d'un batiment et s'il y a des cartes affichés sur le jeu
+# Mets à jour les valeurs de la carte
 func levelUp(Batiment):
 	match Batiment.CardInfo[1]:
 		"Cabane":
@@ -377,59 +394,8 @@ func levelUp(Batiment):
 			Batiment.updateSpecialText()
 			Karma += 10
 			updateKarma(10)
-#func changementMenuToSousMenu(newDeck):
-#	print("Change de Deck")
-#	var GetTimeCard = CardBase.instance()
-#	var WAITINGTIME = GetTimeCard.DRAWTIME * (NumberCardsHand+1)*2
-#	print(WAITINGTIME)
-#
-#	var list = $Cards.get_children()
-#	for DiscCard in $Cards.get_children():
-#		$Cards.remove_child(DiscCard)
-#		$CardsInDiscard.add_child(DiscCard)
-#
-#	for e in range(list.size()):
-#		var CardInHand = list.pop_front()
-#		PlayerHand.CardList[currentDeck].append(CardInHand.Cardname)
-#		CardInHand.deffausseCard()
-#		var t = Timer.new()
-#		t.set_wait_time(GetTimeCard.DRAWTIME/(NumberCardsHand*1.0))
-#		t.set_one_shot(true)
-#		self.add_child(t)
-#		t.start()
-#		yield(t, "timeout")
-#		t.queue_free()
-#
-#	var Card = $CardInPlay.get_children().back()
-#	$CardInPlay.remove_child(Card)
-#	$CardsInDiscard.add_child(Card)
-#	PlayerHand.CardList[currentDeck].append(Card.Cardname)
-#	NumberCardsInPlay -= 1
-#	NumberCardsHand += 1
-#	Card.deffausseCard()
 
-		
-#	print($CardsInDiscard.get_children())
-#
-#	nouveauDeck = newDeck
-#	print("Lancement du minuteur.")
-#
-#	var t = Timer.new()
-#	t.set_wait_time(GetTimeCard.DRAWTIME)
-#	t.set_one_shot(true)
-#	self.add_child(t)
-#	t.start()
-#	yield(t, "timeout")
-#	t.queue_free()
-#
-#	GetTimeCard.queue_free()
-#
-#	Card_Numb = 0
-#	NumberCardsHand = -1
-#	DeckSize = 0
-#	currentDeck = nouveauDeck
-#	drawAllCard()
-
+# Fonction de test pour savoir lorsqu'un cas n'a pas de règle
 func noRule():
 	print("No Rule")
 	pass
