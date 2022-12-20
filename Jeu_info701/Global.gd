@@ -7,7 +7,7 @@
 # C'est pourquoi ce script est vide.
 extends Node
 
-# Fonction d'initialisation appelée au démarrage du noeud
+# Fonction appelée lorsque le noeud à fini de s'initialiser
 func _ready():
 	pass 
 

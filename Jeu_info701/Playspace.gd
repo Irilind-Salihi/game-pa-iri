@@ -4,30 +4,41 @@
 # Type de noeud : Node2D
 extends Node2D
 
+# Variables pour la scène
 var nbTurn = 0
 var Karma = 0 
 
-var CardSize = Vector2(125,175)
+# Pré-chargement des fichiers nécessaire de la scène dans des variables
 const CardBase = preload("res://Cards/CardBase.tscn")
 const PlayerHand = preload("res://Cards/Player_Hand.gd")
 const CardSlot = preload("res://Cards/CardSlot.tscn")
 onready var CardDatabase = get_node("/root/CardsDatabase")
+
+# Variables utilisés pour la pioche de carte
 var CardSelected = []
+var newTurn = true
+var NumberCardsHand = -1
+var NumberCardsInPlay = 0
 var currentDeck = "Ressource"
 var nouveauDeck = ""
+
+# Attribut des cartes ou du deck
+var CardSize = Vector2(125,175)
+var Card_Numb = 0
 onready var DeckSize = PlayerHand.CardList[currentDeck].size()
-var CardOffset = Vector2()
+
+# Variable pour l'affichage des cartes de la main (Affiché en suivant la courbe d'un ovale)
 onready var CentreCardOval = get_viewport().size * Vector2(0.5, 1.0) + CardSize/2
 onready var Hor_rad = get_viewport().size.x*0.5
 onready var Ver_rad = get_viewport().size.y*0.4
 var angle = 0
-var Card_Numb = 0
-var NumberCardsHand = -1
-var NumberCardsInPlay = 0
 var CardSpread = 0.30
 var OvalAngleVector = Vector2()
-var newTurn = true
 
+# Variable des endroits déposables de la carte
+var CardSlotEmpty = []
+
+# Variable des différents états de la carte
 enum{
 	InHand
 	InPlay
@@ -40,11 +51,11 @@ enum{
 	Discard
 }
 
-# Called when the node enters the scene tree for the first time.
-var CardSlotEmpty = []
+# Fonction d'initialisation appelée au démarrage du noeud
 func _enter_tree():
 	CardSize = (get_viewport().size * (Vector2(1.2,0.9))) * 0.18
-	
+
+# Fonction appelée lorsque le noeud à fini de s'initialiser
 func _ready():
 	randomize()
 	var NewSlot = CardSlot.instance()
@@ -61,10 +72,6 @@ func _ready():
 func updateKarma(modif):
 	Karma += modif
 	$Karma/Align/NbKarma.text = str(Karma)
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
 
 onready var DeckPosition = $Deck/DeckDraw.position
 onready var DiscardPosition = $Discard/DiscardPile.rect_position

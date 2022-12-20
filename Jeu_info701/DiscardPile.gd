@@ -4,7 +4,7 @@
 # Type de noeud : TouchScreenButton (Button pour la compatibilité tactile avec le mobile)
 extends TextureButton
 
-# Fonction d'initialisation appelée au démarrage du noeud
+# Fonction appelée lorsque le noeud à fini de s'initialiser
 func _ready():
 	# On récpère la taille de la carte
 	var TailleCard = $'../../'.CardSize/rect_size

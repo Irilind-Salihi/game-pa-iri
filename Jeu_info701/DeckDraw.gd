@@ -7,7 +7,7 @@ extends TouchScreenButton
 # Taille du deck
 var Decksize = INF
 
-# Fonction d'initialisation appelée au démarrage du noeud
+# Fonction appelée lorsque le noeud à fini de s'initialiser
 func _ready():
 	# On récupère la taille de la carte
 	var TailleCard = $'../../'.CardSize
