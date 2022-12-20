@@ -1,3 +1,7 @@
+# Playspace.gd
+# Script pour la scène Playspace.tscn (scène principale du jeu de carte)
+
+# Type de noeud : Node2D
 extends Node2D
 
 var nbTurn = 0
