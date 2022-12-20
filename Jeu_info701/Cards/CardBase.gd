@@ -1,22 +1,53 @@
+# CardBase.gd
+# Script pour la scène CardBase.tscn (c'est le modèle d'une carte)
+
+# Type de noeud : MarginContainer
 extends MarginContainer
 
+# Signal envoyé par le noeud lorsque la carte est cliquée ou relâchée
 signal selected
 
-# Declare member variables here. Examples:
+# Récupération des informations des cartes
 onready var CardDatabase = get_node("/root/CardsDatabase")
+
+# Attribut et information de la carte
 var Cardname = 'Bois'
 onready var CardInfo = CardDatabase.DATA[Cardname]
 onready var CardImg = str("res://Assets/Cards/",CardInfo[0],"/",Cardname,".png")
+
+# Variables pour le déplacement de la carte
+var setup = true
+var Cardpos = Vector2()
 var startpos = Vector2()
 var targetpos = Vector2()
 var startrot = 0
 var targetrot = 0
 var t = 0
-var DRAWTIME = 0.5
-var ORGANISETIME = 0.2
 onready var Orig_scale = rect_scale
+var startscale = Vector2()
+var targetscale = Vector2()
 var firstTime = true
 
+var CARD_SELECT = true
+
+var NumberCardsHand = 0
+var Card_Numb = 0
+
+var MovingtoHand = false
+var MovingtoInPlay = false
+
+var DiscardPile = Vector2()
+var MovingtoDiscard = false
+
+var DeckPile = Vector2()
+var MovingtoDeck = false
+
+# Variables pour le temps des animations
+var DRAWTIME = 0.5
+var ORGANISETIME = 0.2
+var INMOUSETIME = 0.1
+
+# Variables des différents états de la carte
 enum{
 	InHand
 	InPlay
@@ -28,12 +59,11 @@ enum{
 	MoveDrawnCardToDeck
 	Discard
 }
-
 var state = InHand
+var oldstate = INF
 
-# Called when the node enters the scene tree for the first time.
+# Fonction appelée lorsque le noeud à fini de s'initialiser
 func _ready():
-#	print(CardDatabase.get('Bois'))
 	var CardSize = rect_size
 	$Border.scale *= CardSize/$Border.texture.get_size()
 	$Card.texture = load(CardImg)
@@ -57,10 +87,12 @@ func _ready():
 		setCost(Cost)
 	if SpecialText != " ":
 		setSpecialText(SpecialText)
-		
+
+# Fonction servant à définir le niveau/valeur de la carte	
 func setCost(modif):
 	$Bars/TopBar/Cost/CenterContainer/Cost.text = str(modif)
 
+# Fonction servant à mettre à jour le texte central de la carte
 func updateSpecialText():
 	var SpecialText = str(CardInfo[3])
 	if CardInfo[0] == "Batiment":
@@ -68,41 +100,16 @@ func updateSpecialText():
 			var Y = CardDatabase.DATA[i][2]
 			var X = CardInfo[2]
 			var amountToLevelUp = Y*(Y/2)*X
-			print(amountToLevelUp-CardInfo[4][CardInfo[5].find(i)])
 			SpecialText = SpecialText + " " + str(i) + " : " + str(amountToLevelUp-CardInfo[4][CardInfo[5].find(i)])
 		
 	$Bars/SpecialText/Text/CenterContainer/Type.text = str(SpecialText)
 
+# Fonction servant à définir le texte central de la carte
 func setSpecialText(modif):
 	$Bars/SpecialText/Text/CenterContainer/Type.text = str(modif)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-var setup = true
-var startscale = Vector2()
-var Cardpos = Vector2()
-var ZoomInSize = 2
-var ZOOMINTIME = 0.2
-var ReorganiseNeighbours = true
-var NumberCardsHand = 0
-var Card_Numb = 0
-var NeighbourCard
-var Move_Neightbour_Card_Check = false
-
-var oldstate = INF
-var CARD_SELECT = true
-var INMOUSETIME = 0.1
-var MovingtoHand = false
-var MovingtoInPlay = false
-var targetscale = Vector2()
-
-var DiscardPile = Vector2()
-var MovingtoDiscard = false
-
-var DeckPile = Vector2()
-var MovingtoDeck = false
-
+# Fonction appelée lorsqu'une action est effectuée sur la carte
 func _input(event):
-#	var event_postion = get_canvas_transform().xform_inv(event.position)
 	match state:
 		Selected, InMouse, InPlay:
 			# Si (la carte InPlay et si on click) ou (si on est en état dans la souris ou focus)  
@@ -113,23 +120,8 @@ func _input(event):
 			# Lorsqu'on relache le click
 			if event is InputEventScreenTouch && !event.is_pressed():
 				emit_signal("selected", self, false)
-					
-#					Brouillon d'endroit pour rediriger la carte 
-#						setup = true
-#						MovingtoInPlay = true
-#						targetpos = Cardpos
-#						targetscale = CardSlotSize/rect_size
-#						state = InPlay
-#						CARD_SELECT = true
-					
-#						setup = true
-#						MovingtoDiscard = true
-#						targetpos = Cardpos
-#						state = ReOrganiseHand
-#						state = MoveDrawnCardToDiscard
-#						CARD_SELECT = true
 
-
+# Fonction appelée à chaque frame 
 func _physics_process(delta):
 	match state:
 		Discard:
@@ -140,7 +132,7 @@ func _physics_process(delta):
 			if MovingtoHand:
 				if setup:
 					Setup()
-				if t <= 1: # Always be a 1
+				if t <= 1:
 					rect_position = startpos.linear_interpolate(targetpos, t)
 					rect_rotation = startrot * (1-t) + 0*t
 					rect_scale = startscale * (1-t) + targetscale*t
@@ -155,7 +147,7 @@ func _physics_process(delta):
 			if MovingtoInPlay:
 				if setup:
 					Setup()
-				if t <= 1: # Always be a 1
+				if t <= 1:
 					rect_position = startpos.linear_interpolate(targetpos, t)
 					rect_rotation = startrot * (1-t) + 0*t
 					rect_scale = startscale * (1-t) + targetscale*t
@@ -169,7 +161,7 @@ func _physics_process(delta):
 		InMouse:
 			if setup:
 				Setup()
-			if t <= 1: # Always be a 1
+			if t <= 1: 
 				rect_position = startpos.linear_interpolate(get_global_mouse_position() - $'../../'.CardSize, t)
 				rect_rotation = startrot * (1-t) + 0*t
 				rect_scale = startscale * (1-t) + Orig_scale*t
@@ -179,32 +171,10 @@ func _physics_process(delta):
 				rect_rotation = 0
 		Selected:
 			pass
-#			if setup:
-#				Setup()
-#			if t <= 1: # Always be a 1
-#				rect_position = startpos.linear_interpolate(targetpos, t)
-#				rect_rotation = startrot * (1-t) + 0*t
-#				rect_scale = startscale * (1-t) + Orig_scale*2*t
-#				t += delta/float(ZOOMINTIME)
-#				if ReorganiseNeighbours:
-#					ReorganiseNeighbours = false
-#					NumberCardsHand = $'../../'.NumberCardsHand - 1 # offset for zeroth item
-#					if Card_Numb - 1 >= 0:
-#						Move_Neighbour_Card(Card_Numb - 1,true,1) # true is left!
-#					if Card_Numb - 2 >= 0:
-#						Move_Neighbour_Card(Card_Numb - 2,true,0.25)
-#					if Card_Numb + 1 <= NumberCardsHand:
-#						Move_Neighbour_Card(Card_Numb + 1,false,1)
-#					if Card_Numb + 2 <= NumberCardsHand:
-#						Move_Neighbour_Card(Card_Numb + 2,false,0.25)
-#			else:
-#				rect_position = targetpos
-#				rect_rotation = 0
-#				rect_scale = Orig_scale*ZoomInSize
-		MoveDrawnCardToHand: # animate from the deck to my hand
+		MoveDrawnCardToHand: # Animation de la carte allant vers la main
 			if setup:
 				Setup()
-			if t <= 1: # Always be a 1
+			if t <= 1:
 				rect_position = startpos.linear_interpolate(targetpos, t)
 				rect_rotation = startrot * (1-t) + targetrot*t
 				if firstTime:
@@ -218,35 +188,23 @@ func _physics_process(delta):
 					firstTime = false
 				rect_position = targetpos
 				rect_rotation = targetrot
-				state = InHand
-				
-		ReOrganiseHand:
+				state = InHand	
+		ReOrganiseHand: # Etat pour remettre en ordre la position des cartes
 			if setup:
 				Setup()
-			if t <= 1: # Always be a 1
+			if t <= 1:
 				if Move_Neightbour_Card_Check:
 					Move_Neightbour_Card_Check = false
 				rect_position = startpos.linear_interpolate(targetpos, t)
 				rect_rotation = startrot * (1-t) + targetrot*t
 				rect_scale = startscale * (1-t) + Orig_scale*t
 				t += delta/float(ORGANISETIME)
-				if ReorganiseNeighbours == false:
-					ReorganiseNeighbours = true
-					if Card_Numb - 1 >= 0:
-						Reset_Card(Card_Numb - 1) # true is left!
-					if Card_Numb - 2 >= 0:
-						Reset_Card(Card_Numb - 2)
-					if Card_Numb + 1 <= NumberCardsHand:
-						Reset_Card(Card_Numb + 1)
-					if Card_Numb + 2 <= NumberCardsHand:
-						Reset_Card(Card_Numb + 2)
 			else:
 				rect_position = targetpos
 				rect_rotation = targetrot
 				rect_scale = Orig_scale
-				state = InHand
-				
-		MoveDrawnCardToDiscard:
+				state = InHand	
+		MoveDrawnCardToDiscard: # Animation de la carte allant vers la défausse
 			if MovingtoDiscard:
 				if setup:
 					Setup()
@@ -260,7 +218,7 @@ func _physics_process(delta):
 					
 					var randomAngle = (randf()*30.0) - 15.0
 					targetrot = (randomAngle*1.0)
-				if t <= 1: # Always be a 1
+				if t <= 1:
 					rect_position = startpos.linear_interpolate(targetpos, t)
 					rect_rotation = startrot * (1-t) + targetrot*t
 					rect_scale = startscale * (1-t) + Orig_scale*t
@@ -271,13 +229,13 @@ func _physics_process(delta):
 					rect_scale = Orig_scale
 					MovingtoDiscard = false
 					state = Discard
-		MoveDrawnCardToDeck:
+		MoveDrawnCardToDeck: # Animation de la carte allant vers le deck
 			if MovingtoDeck:
 				if setup:
 					Setup()
 					targetpos = DeckPile
 					targetrot = 0
-				if t <= 1: # Always be a 1
+				if t <= 1:
 					rect_position = startpos.linear_interpolate(targetpos, t)
 					rect_scale = startscale * (1-t) + Orig_scale*t
 					rect_scale.x = Orig_scale.x * abs(2*t - 1)
@@ -293,26 +251,7 @@ func _physics_process(delta):
 					MovingtoDeck = false
 					self.queue_free()
 
-func Move_Neighbour_Card(Card_Number,Left,Spreadfactor):
-	NeighbourCard = $'../'.get_child(Card_Number)
-	if Left:
-		NeighbourCard.targetpos = NeighbourCard.Cardpos - Spreadfactor*Vector2(65,0)
-	else:
-		NeighbourCard.targetpos = NeighbourCard.Cardpos + Spreadfactor*Vector2(65,0)
-	NeighbourCard.setup = true
-	NeighbourCard.state = ReOrganiseHand
-	NeighbourCard.Move_Neightbour_Card_Check = true
-
-func Reset_Card(Card_Number):
-#    if NeighbourCard.Move_Neightbour_Card_Check:
-#        NeighbourCard.Move_Neightbour_Card_Check = false
-	if NeighbourCard.Move_Neightbour_Card_Check == false:
-		NeighbourCard = $'../'.get_child(Card_Number)
-		if NeighbourCard.state != Selected:
-			NeighbourCard.state = ReOrganiseHand
-			NeighbourCard.targetpos = NeighbourCard.Cardpos
-			NeighbourCard.setup = true
-
+# Fonction qui initialise les variables de départ d'une animation avec les valeurs actuelles
 func Setup():
 	startpos = rect_position
 	startrot = rect_rotation
@@ -320,47 +259,31 @@ func Setup():
 	t = 0
 	setup = false
 
-#func _on_Focus_mouse_entered():
-#	printState()
-#	match state:
-#		InHand, ReOrganiseHand:
-#			setup = true
-#			targetpos = Cardpos
-#			targetpos.y = get_viewport().size.y - $'../../'.CardSize.y*ZoomInSize
-#			state = Selected
-#	pass
-
-#func _on_Focus_mouse_exited():
-#	match state:
-#		Selected:
-#			setup = true
-#			targetpos = Cardpos
-#			state = ReOrganiseHand
-#	pass
-
-
+# Fonction qui est connecté avec le tactile de la carte lorsqu'il est appuyé
 func _on_TouchCard_pressed():
-#	print("down "+Cardname+ " - old state : "+ str(state))
 	match state:
 		InHand, ReOrganiseHand:
 			state = Selected
 
+# Fonction qui est connecté avec le tactile de la carte lorsqu'il est relaché
 func _on_TouchCard_released():
-#	print("up "+Cardname)
 	match state:
 		Selected:
 			state = ReOrganiseHand
 
+# Fonction qui change l'état de la card pour pouvoir être défaussé (faire l'animation)
 func deffausseCard():
 	setup = true
 	MovingtoDiscard = true
 	state = MoveDrawnCardToDiscard
 
+# Fonction qui change l'état de la card pour pouvoir retourner dans le deck (faire l'animation)
 func returnDeckCard():
 	setup = true
 	MovingtoDiscard = true
 	state = MoveDrawnCardToDiscard
 
+# Fonction de test pour connaître l'état actuel de la carte
 func printState():
 	match state:
 		0:
@@ -381,16 +304,3 @@ func printState():
 			print(Cardname, " : MoveDrawnCardToDeck")
 		_:
 			print("error unknow state")
-
-# To do (plus haut = plus important) : 
-#	- Voir la compatibilité téléphone et report les bugs + faire la doc d'installe pour le prof
-#	- Focus compatible sur téléphone (Placer la carte dans la partie basse de l'écran et elle apparait en immense) Puis disparait quand on sort ou relache la carte
-#	- 
-
-#
-#func _on_Victime_button_down():
-#	print("down "+Cardname+ " - old state : "+ str(state))
-#
-#
-#func _on_Victime_button_up():
-#	print("up "+Cardname)
