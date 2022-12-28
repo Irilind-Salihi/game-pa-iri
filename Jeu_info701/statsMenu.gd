@@ -5,9 +5,9 @@ var dynamic_font = DynamicFont.new()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	#Set custom font
 	dynamic_font.font_data = load("res://Assets/font/Panton-Trial-Bold.ttf")
 	dynamic_font.size = 100
-	
 	
 	
 	$searchHboxContainer/submit.text = "chercher"
@@ -19,7 +19,7 @@ func _ready():
 	
 	
 	
-	
+#Function that init the label for all the date loaded from the db
 func settext():
 	$statsVboxContainer/usernameLabel.text = "Joueur : "
 	$statsVboxContainer/usernameLabel.add_font_override("font", dynamic_font)
@@ -43,11 +43,8 @@ func settext():
 	$statsVboxContainer/karmaLabel.add_font_override("font", dynamic_font)
 	$statsVboxContainer/karmaLabel.add_color_override("font_color", Color.white)
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
 
-
+#When the search Stats request to api is done set all the label with corresponding data
 func _on_searchStats_request_completed(result, response_code, headers, body):
 	var json = JSON.parse(body.get_string_from_utf8())
 	var dict = json.result
@@ -62,7 +59,7 @@ func _on_searchStats_request_completed(result, response_code, headers, body):
 		
 
 
-
+#On submit button pressed do the api request
 func _on_submit_pressed():
 	var headers = ["Content-Type: application/json"]
 	var body = {
@@ -71,6 +68,6 @@ func _on_submit_pressed():
 	print(body)
 	$searchStatsRequest.request("http://51.68.226.111:1234/gameRecord/search",headers, false, HTTPClient.METHOD_POST, to_json(body))
 
-
+#button to go back to the main scene
 func _on_back_pressed():
 	get_tree().change_scene("res://MainMenu.tscn")

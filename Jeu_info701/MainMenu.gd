@@ -24,8 +24,10 @@ func loadAccess():
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	#force start the music at the app launch
 	$AudioStreamPlayer.play()
 	
+	#Set the three button size
 	$startTouchScreen.position.x =get_viewport().size.x * 0.13
 	$startTouchScreen.position.y =get_viewport().size.y * 0.25
 	$startTouchScreen.scale = Vector2(500,100) / $startTouchScreen.normal.get_size()
@@ -38,6 +40,7 @@ func _ready():
 	$loginTouchScreen.position.y =get_viewport().size.y * 0.75
 	$loginTouchScreen.scale = Vector2(500,100) / $loginTouchScreen.normal.get_size()
 	
+	#If my token exist on my app, then check if the token is valid
 	if(loadAccess()):
 		var headers = ["Content-Type: application/json","Authorization: Bearer "+token["access_token"]]
 		var body = {}
@@ -47,28 +50,21 @@ func _ready():
 	
 	
 
-	
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-
-
+#Function to change to playspace scene
 func _on_startTouchScreen_pressed():
 	get_tree().change_scene("res://Playspace.tscn")
 
 
-
+#Function to change to statsMenu scene
 func _on_statsTouchScreen_pressed():
 	get_tree().change_scene("res://statsMenu.tscn")
 
-
+#Function to change to karmaMenu scene
 func _on_loginTouchScreen_pressed():
 	get_tree().change_scene("res://karmaMenu.tscn")
 
 
-
+#Function to check if the registered bearer token is valid
 func _on_checkLogin_request_completed(result, response_code, headers, body):
 	var dir = Directory.new()
 	var json = JSON.parse(body.get_string_from_utf8())
@@ -78,7 +74,6 @@ func _on_checkLogin_request_completed(result, response_code, headers, body):
 		get_node("CheckButton").pressed = true
 	else:
 		get_node("CheckButton").pressed = false
-		print("ttest")
 		dir.remove("res://accesstoken.json")
 
 
