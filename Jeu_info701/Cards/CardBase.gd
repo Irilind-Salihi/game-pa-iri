@@ -193,8 +193,6 @@ func _physics_process(delta):
 			if setup:
 				Setup()
 			if t <= 1:
-				if Move_Neightbour_Card_Check:
-					Move_Neightbour_Card_Check = false
 				rect_position = startpos.linear_interpolate(targetpos, t)
 				rect_rotation = startrot * (1-t) + targetrot*t
 				rect_scale = startscale * (1-t) + Orig_scale*t
